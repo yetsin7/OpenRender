@@ -1,0 +1,755 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:OpenRender.ViewModels"
+        xmlns:ctrl="using:OpenRender.Controls"
+        x:Class="OpenRender.Views.MainWindow"
+        x:Name="RootWindow"
+        Title="Open Render Studio"
+        Width="1280" Height="880"
+        MinWidth="1024" MinHeight="720"
+        WindowStartupLocation="CenterScreen"
+        CanResize="True"
+        Background="{DynamicResource WindowBgBrush}"
+        SystemDecorations="Full">
+
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+
+    <DockPanel LastChildFill="True">
+
+        <Border DockPanel.Dock="Top"
+                Background="{DynamicResource HeaderBrush}"
+                BorderBrush="{DynamicResource BorderBrushApp}"
+                BorderThickness="0,0,0,1"
+                Padding="22,18,22,16">
+            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Row="0" Grid.Column="0" Spacing="6">
+                    <TextBlock Text="OPEN RENDER STUDIO"
+                               FontSize="13"
+                               FontWeight="Bold"
+                               LetterSpacing="2"
+                               Foreground="{DynamicResource AccentBrush}"/>
+                    <TextBlock Text="{Binding WorkspaceTitle}"
+                               FontSize="26"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBlock Text="{Binding WorkspaceSubtitle}"
+                               MaxWidth="760"
+                               TextWrapping="Wrap"
+                               FontSize="13"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="10"
+                            VerticalAlignment="Top">
+                    <Border Classes="statusBadge" Background="#224FD1C5">
+                        <TextBlock Text="{Binding WorkspaceModeText}" Classes="badgeText"/>
+                    </Border>
+                    <Border Classes="statusBadge" Background="#22F59E0B">
+                        <TextBlock Text="{Binding SceneInfoText}" Classes="badgeText"/>
+                    </Border>
+                    <Button Content="Exportar foto"
+                            Classes="ghostActionBtn"
+                            Command="{Binding ExportRenderCommand}"/>
+                    <Button Content="Render"
+                            Classes="accentActionBtn"
+                            Command="{Binding RenderCommand}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.ColumnSpan="2"
+                            Orientation="Horizontal"
+                            Spacing="10"
+                            Margin="0,18,0,0">
+                    <Button Content="Importar modelo"
+                            Classes="toolbarBtn"
+                            Command="{Binding ImportFileCommand}"/>
+                    <Button Content="Cargar estudio demo"
+                            Classes="toolbarBtn"
+                            Command="{Binding NewSceneCommand}"/>
+                    <Button Content="Encuadrar todo"
+                            Classes="toolbarBtn"
+                            Command="{Binding FrameAllCommand}"/>
+                    <Button Content="Reset cámara"
+                            Classes="toolbarBtn"
+                            Command="{Binding ResetCameraCommand}"/>
+                    <Button Content="GitHub"
+                            Classes="toolbarBtn"
+                            Command="{Binding OpenGithubCommand}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom"
+                Background="{DynamicResource PanelBgBrush}"
+                BorderBrush="{DynamicResource BorderBrushApp}"
+                BorderThickness="0,1,0,0"
+                Padding="16,10">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Grid.Column="0"
+                           Text="{Binding StatusText}"
+                           FontSize="12"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <TextBlock Grid.Column="1"
+                           Margin="18,0,0,0"
+                           Text="{Binding CameraFocusText}"
+                           FontSize="12"
+                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                <TextBlock Grid.Column="2"
+                           Margin="18,0,0,0"
+                           Text="{Binding RenderInfoText}"
+                           FontSize="12"
+                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+            </Grid>
+        </Border>
+
+        <Grid ColumnDefinitions="230,Auto,*,Auto,300"
+              Background="{DynamicResource WindowBgBrush}">
+
+            <Border Grid.Column="0"
+                    Margin="14"
+                    Background="{DynamicResource PanelBgBrush}"
+                    BorderBrush="{DynamicResource BorderBrushApp}"
+                    BorderThickness="1"
+                    CornerRadius="18">
+                <ScrollViewer Padding="16,16,16,20" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="14">
+                        <Border Classes="panelCard" Padding="14">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="PROYECTO"
+                                           Classes="sectionEyebrow"/>
+                                <TextBlock Text="{Binding CurrentSceneLabel}"
+                                           FontSize="20"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding ViewportText}"
+                                           FontSize="12"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Grid ColumnDefinitions="*,*,*">
+                            <Border Grid.Column="0" Classes="metricCard" Margin="0,0,10,0">
+                                <StackPanel>
+                                    <TextBlock Text="OBJETOS" Classes="metricLabel"/>
+                                    <TextBlock Text="{Binding ObjectCount}" Classes="metricValue"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="1" Classes="metricCard" Margin="0,0,10,0">
+                                <StackPanel>
+                                    <TextBlock Text="TRIS" Classes="metricLabel"/>
+                                    <TextBlock Text="{Binding TriangleCount, StringFormat={}{0:N0}}" Classes="metricValue"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="2" Classes="metricCard">
+                                <StackPanel>
+                                    <TextBlock Text="MATS" Classes="metricLabel"/>
+                                    <TextBlock Text="{Binding MaterialCount}" Classes="metricValue"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Border Classes="panelCard" Padding="14">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="IMPORTACIÓN"
+                                           Classes="sectionEyebrow"/>
+                                <CheckBox Content="Corregir orientación Z-Up / Y-Up"
+                                          IsChecked="{Binding AutoFixOrientation}"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <CheckBox Content="Recentralizar modelo al importar"
+                                          IsChecked="{Binding AutoRecenter}"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding SupportedFormatsText}"
+                                           FontSize="11"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextMutedBrush}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="panelCard" Padding="14">
+                            <StackPanel Spacing="12">
+                                <DockPanel>
+                                    <TextBlock Text="ESCENA" Classes="sectionEyebrow"/>
+                                    <TextBlock DockPanel.Dock="Right"
+                                               Text="{Binding SceneNodeCount, StringFormat={}{0} items}"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextMutedBrush}"/>
+                                </DockPanel>
+
+                                <TextBox Watermark="Filtrar escena..."
+                                         Text="{Binding SceneFilterText}"
+                                         Background="#172238"
+                                         BorderBrush="{DynamicResource BorderBrushApp}"
+                                         Foreground="{DynamicResource TextPrimaryBrush}"/>
+
+                                <ListBox ItemsSource="{Binding SceneNodes}"
+                                         SelectedItem="{Binding SelectedSceneNode}"
+                                         Background="Transparent"
+                                         BorderThickness="0">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Classes="sceneItemCard">
+                                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                                    <Border Width="38" Height="38" CornerRadius="12" Background="#1F53D3C2">
+                                                        <TextBlock Text="{Binding Icon}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                                    </Border>
+                                                    <StackPanel Grid.Column="1" Margin="10,0,10,0" Spacing="2" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Name}"
+                                                                   FontSize="13"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                                        <TextBlock Text="{Binding Subtitle}"
+                                                                   FontSize="11"
+                                                                   TextWrapping="Wrap"
+                                                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                    </StackPanel>
+                                                    <CheckBox Grid.Column="2"
+                                                              IsVisible="{Binding SupportsVisibility}"
+                                                              IsChecked="{Binding IsVisible}"
+                                                              VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="panelCard" Padding="14">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="ARCHIVOS RECIENTES"
+                                           Classes="sectionEyebrow"/>
+                                <ItemsControl ItemsSource="{Binding RecentFiles}"
+                                              IsVisible="{Binding HasRecentFiles}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Margin="0,0,0,8"
+                                                    Padding="12,10"
+                                                    HorizontalContentAlignment="Left"
+                                                    Classes="recentBtn"
+                                                    Command="{Binding #RootWindow.DataContext.OpenRecentFileCommand}"
+                                                    CommandParameter="{Binding}">
+                                                <TextBlock Text="{Binding}"
+                                                           TextWrapping="Wrap"
+                                                           FontSize="11"/>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="Todavía no hay archivos recientes."
+                                           IsVisible="{Binding !HasRecentFiles}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextMutedBrush}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <GridSplitter Grid.Column="1" Width="8" Background="Transparent"/>
+
+            <Border Grid.Column="2"
+                    Margin="0,14,0,14"
+                    Background="{DynamicResource PanelBgBrush}"
+                    BorderBrush="{DynamicResource BorderBrushApp}"
+                    BorderThickness="1"
+                    CornerRadius="18"
+                    ClipToBounds="True">
+                <Grid>
+                    <ctrl:ViewportControl Scene="{Binding Scene}" />
+
+                    <Border HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Margin="16"
+                            Padding="14,12"
+                            Background="{DynamicResource OverlayBrush}"
+                            CornerRadius="14"
+                            MaxWidth="280">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding ViewportTitle}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="{Binding LoadedModelInfo}"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"
+                                       MaxWidth="520"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Margin="0,18,18,0"
+                            Padding="8"
+                            Background="{DynamicResource OverlayBrush}"
+                            CornerRadius="16">
+                        <WrapPanel ItemHeight="34" ItemWidth="88">
+                            <Button Content="3D" Classes="chipBtn" Command="{Binding SetViewCommand}" CommandParameter="3D"/>
+                            <Button Content="Frente" Classes="chipBtn" Command="{Binding SetViewCommand}" CommandParameter="Front"/>
+                            <Button Content="Posterior" Classes="chipBtn" Command="{Binding SetViewCommand}" CommandParameter="Back"/>
+                            <Button Content="Izquierda" Classes="chipBtn" Command="{Binding SetViewCommand}" CommandParameter="Left"/>
+                            <Button Content="Derecha" Classes="chipBtn" Command="{Binding SetViewCommand}" CommandParameter="Right"/>
+                            <Button Content="Planta" Classes="chipBtn" Command="{Binding SetViewCommand}" CommandParameter="Top"/>
+                        </WrapPanel>
+                    </Border>
+
+                    <Border Background="#C410192D"
+                            IsVisible="{Binding IsLoading}">
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Width="360"
+                                    Spacing="12">
+                            <TextBlock Text="Preparando geometría y viewport..."
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <ProgressBar Minimum="0"
+                                         Maximum="100"
+                                         Height="10"
+                                         Value="{Binding ProgressValue}"
+                                         Foreground="{DynamicResource AccentBrush}"/>
+                            <TextBlock Text="{Binding ProgressValue, StringFormat={}{0:F0}%}"
+                                       FontSize="12"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding ShowEmptyState}"
+                            Padding="24"
+                            MaxWidth="430"
+                            Background="{DynamicResource OverlayBrush}"
+                            CornerRadius="18">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Importa tu primer modelo"
+                                       FontSize="24"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Open Render te deja navegar el proyecto, ajustar materiales y exportar una imagen desde el viewport actual."
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       FontSize="13"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <Button Content="Importar modelo"
+                                    Classes="accentActionBtn"
+                                    HorizontalAlignment="Center"
+                                    Command="{Binding ImportFileCommand}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            Margin="16"
+                            Padding="12,10"
+                            Background="{DynamicResource OverlayBrush}"
+                            CornerRadius="14">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="NAVEGACIÓN"
+                                       Classes="sectionEyebrow"/>
+                            <TextBlock Text="RMB mirar · LMB orbitar · MMB pan · rueda zoom"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="WASD mover · Shift sprint · doble click MMB encuadra"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Margin="16"
+                            Padding="12,10"
+                            Background="{DynamicResource OverlayBrush}"
+                            CornerRadius="14">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="SALIDA"
+                                       Classes="sectionEyebrow"/>
+                            <TextBlock Text="{Binding RenderResolution}"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="{Binding OutputFormatText}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <GridSplitter Grid.Column="3" Width="8" Background="Transparent"/>
+
+            <Border Grid.Column="4"
+                    Margin="14"
+                    Background="{DynamicResource PanelBgBrush}"
+                    BorderBrush="{DynamicResource BorderBrushApp}"
+                    BorderThickness="1"
+                    CornerRadius="18">
+                <ScrollViewer Padding="16,16,16,20" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="14">
+                        <Border Classes="panelCard" Padding="14">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="INSPECTOR"
+                                           Classes="sectionEyebrow"/>
+                                <TextBlock Text="{Binding SelectedNodeTitle}"
+                                           FontSize="20"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding SelectedNodeDetails}"
+                                           FontSize="12"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="panelCard" Padding="14">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="MATERIAL"
+                                           Classes="sectionEyebrow"/>
+                                <TextBlock Text="{Binding SelectedMaterialCategory}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding SelectedMaterialUsageText}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextMutedBrush}"/>
+
+                                <ComboBox ItemsSource="{Binding SceneMaterials}"
+                                          SelectedItem="{Binding SelectedMaterial}"
+                                          IsVisible="{Binding HasSelectedMaterial}"
+                                          MaxDropDownHeight="300">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <TextBlock Text="{Binding Category}"
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource TextMutedBrush}"/>
+                                                    <TextBlock Text="·"
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource TextMutedBrush}"/>
+                                                    <TextBlock Text="{Binding UsageCount, StringFormat={}{0} usos}"
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource TextMutedBrush}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+
+                                <TextBlock Text="EN USO EN ESCENA"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           LetterSpacing="1.3"
+                                           Foreground="{DynamicResource TextMutedBrush}"/>
+
+                                <StackPanel IsVisible="{Binding HasSelectedMaterial}" Spacing="10">
+                                    <DockPanel>
+                                        <TextBlock Text="Albedo R" Width="84" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding MaterialAlbedoR, StringFormat={}{0:F2}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <Slider Minimum="0" Maximum="1" Value="{Binding MaterialAlbedoR}" Margin="8,0,8,0"/>
+                                    </DockPanel>
+                                    <DockPanel>
+                                        <TextBlock Text="Albedo G" Width="84" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding MaterialAlbedoG, StringFormat={}{0:F2}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <Slider Minimum="0" Maximum="1" Value="{Binding MaterialAlbedoG}" Margin="8,0,8,0"/>
+                                    </DockPanel>
+                                    <DockPanel>
+                                        <TextBlock Text="Albedo B" Width="84" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding MaterialAlbedoB, StringFormat={}{0:F2}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <Slider Minimum="0" Maximum="1" Value="{Binding MaterialAlbedoB}" Margin="8,0,8,0"/>
+                                    </DockPanel>
+                                    <DockPanel>
+                                        <TextBlock Text="Roughness" Width="84" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding SelectedMaterial.Roughness, StringFormat={}{0:F2}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <Slider Minimum="0" Maximum="1" Value="{Binding SelectedMaterial.Roughness}" Margin="8,0,8,0"/>
+                                    </DockPanel>
+                                    <DockPanel>
+                                        <TextBlock Text="Metallic" Width="84" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding SelectedMaterial.Metallic, StringFormat={}{0:F2}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <Slider Minimum="0" Maximum="1" Value="{Binding SelectedMaterial.Metallic}" Margin="8,0,8,0"/>
+                                    </DockPanel>
+                                    <DockPanel>
+                                        <TextBlock Text="Opacity" Width="84" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding SelectedMaterial.Opacity, StringFormat={}{0:F2}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <Slider Minimum="0" Maximum="1" Value="{Binding SelectedMaterial.Opacity}" Margin="8,0,8,0"/>
+                                    </DockPanel>
+                                </StackPanel>
+
+                                <TextBlock Text="Selecciona una malla para editar su material."
+                                           IsVisible="{Binding !HasSelectedMaterial}"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource TextMutedBrush}"/>
+
+                                <Border Height="1" Background="{DynamicResource BorderBrushApp}" Margin="0,2,0,2"/>
+
+                                <TextBlock Text="BIBLIOTECA"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           LetterSpacing="1.3"
+                                           Foreground="{DynamicResource TextMutedBrush}"/>
+                                <TextBlock Text="{Binding MaterialLibraryInfoText}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                                <ComboBox ItemsSource="{Binding MaterialLibraryPresets}"
+                                          SelectedItem="{Binding SelectedLibraryMaterial}"
+                                          MaxDropDownHeight="340">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}"/>
+                                                <TextBlock Text="{Binding Category}"
+                                                           FontSize="10"
+                                                           Foreground="{DynamicResource TextMutedBrush}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+
+                                <TextBlock Text="{Binding SelectedLibraryMaterial.Description}"
+                                           TextWrapping="Wrap"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                                <Grid ColumnDefinitions="*,*">
+                                    <Button Grid.Column="0"
+                                            Margin="0,0,10,0"
+                                            Content="Aplicar al objeto"
+                                            Classes="accentActionBtn"
+                                            Command="{Binding ApplySelectedLibraryPresetCommand}"
+                                            IsVisible="{Binding HasSelectedMeshNode}"/>
+                                    <Button Grid.Column="1"
+                                            Content="Autoestilizar"
+                                            Classes="ghostActionBtn"
+                                            Command="{Binding AutoStyleSceneMaterialsCommand}"/>
+                                </Grid>
+
+                                <WrapPanel>
+                                    <Button Content="Cantera" Classes="chipBtn" Command="{Binding ApplyMaterialPresetCommand}" CommandParameter="stone-cantera"/>
+                                    <Button Content="Concreto" Classes="chipBtn" Command="{Binding ApplyMaterialPresetCommand}" CommandParameter="concrete-polished"/>
+                                    <Button Content="Nogal" Classes="chipBtn" Command="{Binding ApplyMaterialPresetCommand}" CommandParameter="wood-walnut"/>
+                                    <Button Content="Cerámica" Classes="chipBtn" Command="{Binding ApplyMaterialPresetCommand}" CommandParameter="ceramic-ivory"/>
+                                    <Button Content="Metal Negro" Classes="chipBtn" Command="{Binding ApplyMaterialPresetCommand}" CommandParameter="metal-black"/>
+                                    <Button Content="Vidrio" Classes="chipBtn" Command="{Binding ApplyMaterialPresetCommand}" CommandParameter="glass-clear"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="panelCard" Padding="14">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="CÁMARA"
+                                           Classes="sectionEyebrow"/>
+                                <DockPanel>
+                                    <TextBlock Text="FOV" Width="86" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding CameraFov, StringFormat={}{0:F0}°}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <Slider Minimum="20" Maximum="110" Value="{Binding CameraFov}" Margin="8,0,8,0"/>
+                                </DockPanel>
+                                <DockPanel>
+                                    <TextBlock Text="Distancia" Width="86" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding CameraDistance, StringFormat={}{0:F1}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <Slider Minimum="0.5" Maximum="2500" Value="{Binding CameraDistance}" Margin="8,0,8,0"/>
+                                </DockPanel>
+                                <DockPanel>
+                                    <TextBlock Text="Fly speed" Width="86" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding NavigationSpeed, StringFormat={}{0:F1}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <Slider Minimum="0.5" Maximum="250" Value="{Binding NavigationSpeed}" Margin="8,0,8,0"/>
+                                </DockPanel>
+                                <TextBlock Text="{Binding CameraFocusText}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextMutedBrush}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="panelCard" Padding="14">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="FOTO Y SALIDA"
+                                           Classes="sectionEyebrow"/>
+                                <WrapPanel>
+                                    <Button Content="HD" Classes="chipBtn" Command="{Binding SetResolutionPresetCommand}" CommandParameter="HD"/>
+                                    <Button Content="FHD" Classes="chipBtn" Command="{Binding SetResolutionPresetCommand}" CommandParameter="FHD"/>
+                                    <Button Content="QHD" Classes="chipBtn" Command="{Binding SetResolutionPresetCommand}" CommandParameter="QHD"/>
+                                    <Button Content="4K" Classes="chipBtn" Command="{Binding SetResolutionPresetCommand}" CommandParameter="4K"/>
+                                </WrapPanel>
+                                <WrapPanel>
+                                    <Button Content="PNG" Classes="chipBtn" Command="{Binding SetOutputFormatCommand}" CommandParameter="Png"/>
+                                    <Button Content="JPEG" Classes="chipBtn" Command="{Binding SetOutputFormatCommand}" CommandParameter="Jpeg"/>
+                                    <Button Content="BMP" Classes="chipBtn" Command="{Binding SetOutputFormatCommand}" CommandParameter="Bmp"/>
+                                    <Button Content="TIFF" Classes="chipBtn" Command="{Binding SetOutputFormatCommand}" CommandParameter="Tiff"/>
+                                </WrapPanel>
+                                <WrapPanel>
+                                    <Button Content="Draft" Classes="chipBtn" Command="{Binding SetQualityCommand}" CommandParameter="Draft"/>
+                                    <Button Content="Medium" Classes="chipBtn" Command="{Binding SetQualityCommand}" CommandParameter="Medium"/>
+                                    <Button Content="High" Classes="chipBtn" Command="{Binding SetQualityCommand}" CommandParameter="High"/>
+                                    <Button Content="Ultra" Classes="chipBtn" Command="{Binding SetQualityCommand}" CommandParameter="Ultra"/>
+                                </WrapPanel>
+                                <Button Content="Primera foto"
+                                        Classes="ghostActionBtn"
+                                        Command="{Binding PreparePhotoShotCommand}"/>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Button Grid.Column="0"
+                                            Margin="0,0,10,0"
+                                            Content="Render preview"
+                                            Classes="ghostActionBtn"
+                                            Command="{Binding RenderCommand}"/>
+                                    <Button Grid.Column="1"
+                                            Content="Exportar still"
+                                            Classes="accentActionBtn"
+                                            Command="{Binding ExportRenderCommand}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="panelCard" Padding="14">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="ENTORNO"
+                                           Classes="sectionEyebrow"/>
+                                <WrapPanel>
+                                    <Button Content="Day" Classes="chipBtn" Command="{Binding ApplyEnvironmentPresetCommand}" CommandParameter="Day"/>
+                                    <Button Content="Overcast" Classes="chipBtn" Command="{Binding ApplyEnvironmentPresetCommand}" CommandParameter="Overcast"/>
+                                    <Button Content="Sunset" Classes="chipBtn" Command="{Binding ApplyEnvironmentPresetCommand}" CommandParameter="Sunset"/>
+                                    <Button Content="Studio" Classes="chipBtn" Command="{Binding ApplyEnvironmentPresetCommand}" CommandParameter="Studio"/>
+                                </WrapPanel>
+                                <DockPanel>
+                                    <TextBlock Text="Sol" Width="86" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding SunIntensity, StringFormat={}{0:F1}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <Slider Minimum="0" Maximum="5" Value="{Binding SunIntensity}" Margin="8,0,8,0"/>
+                                </DockPanel>
+                                <DockPanel>
+                                    <TextBlock Text="Ambiente" Width="86" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding AmbientIntensity, StringFormat={}{0:F2}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <Slider Minimum="0" Maximum="1" Value="{Binding AmbientIntensity}" Margin="8,0,8,0"/>
+                                </DockPanel>
+                                <TextBlock Text="{Binding SunStatusText}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource SuccessBrush}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </DockPanel>
+
+    <Window.Styles>
+        <Style Selector="Border.panelCard">
+            <Setter Property="Background" Value="{DynamicResource PanelAltBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushApp}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="16"/>
+        </Style>
+
+        <Style Selector="Border.metricCard">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushApp}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="12"/>
+        </Style>
+
+        <Style Selector="Border.sceneItemCard">
+            <Setter Property="Background" Value="#1A2235"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushApp}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <Style Selector="TextBlock.sectionEyebrow">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="LetterSpacing" Value="1.6"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+        </Style>
+
+        <Style Selector="TextBlock.metricLabel">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="LetterSpacing" Value="1.4"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+        </Style>
+
+        <Style Selector="TextBlock.metricValue">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        </Style>
+
+        <Style Selector="Border.statusBadge">
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="CornerRadius" Value="14"/>
+        </Style>
+
+        <Style Selector="TextBlock.badgeText">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        </Style>
+
+        <Style Selector="Button.toolbarBtn">
+            <Setter Property="Background" Value="#1E2A44"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushApp}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style Selector="Button.ghostActionBtn">
+            <Setter Property="Background" Value="#1E2A44"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushApp}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style Selector="Button.accentActionBtn">
+            <Setter Property="Background" Value="{DynamicResource AccentBrushStrong}"/>
+            <Setter Property="Foreground" Value="#07111F"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <Style Selector="Button.chipBtn">
+            <Setter Property="Background" Value="#172238"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushApp}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+        </Style>
+
+        <Style Selector="Button.recentBtn">
+            <Setter Property="Background" Value="#172238"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushApp}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+        </Style>
+    </Window.Styles>
+
+</Window>

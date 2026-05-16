@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "start": "dotnet run --project OpenRender.csproj",
+    "build": "dotnet build OpenRender.sln",
+    "clean": "dotnet clean OpenRender.sln"
+  }
+}

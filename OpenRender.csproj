@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>OpenRender</RootNamespace>
+    <AssemblyName>OpenRender</AssemblyName>
+    <Description>Open Render - Lightweight Architectural Rendering Software</Description>
+    <ApplicationIcon />
+    <StartupObject>OpenRender.Program</StartupObject>
+    <DefaultItemExcludes>$(DefaultItemExcludes);OpenRender.Core\**;OpenRender.Rendering\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.3" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Tmds.DBus.Protocol" Version="0.93.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="OpenRender.Core\OpenRender.Core.csproj" />
+    <ProjectReference Include="OpenRender.Rendering\OpenRender.Rendering.csproj" />
+  </ItemGroup>
+
+</Project>
