@@ -1,0 +1,152 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:OpenRender.ViewModels"
+             x:Class="OpenRender.Views.Sections.DashboardView"
+             x:Name="DashboardRoot">
+    <ScrollViewer Background="#131313">
+        <StackPanel Margin="60,54,60,48" Spacing="30">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="heroTitle" Text="{Binding Text.DashboardTitle}" />
+                    <TextBlock Classes="heroSubtitle" Text="{Binding Text.DashboardSubtitle}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="10"
+                            VerticalAlignment="Bottom">
+                    <Button Classes="ghostActionButton" MinWidth="88">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE71C;" />
+                            <TextBlock Text="{Binding Text.Filter}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="ghostActionButton" MinWidth="82">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8CB;" />
+                            <TextBlock Text="{Binding Text.Sort}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <WrapPanel Orientation="Horizontal">
+                <Button Classes="cardButton dashedCard"
+                        Width="356"
+                        Height="348"
+                        Margin="0,0,20,20"
+                        Command="{Binding NewSceneCommand}">
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="14">
+                        <Border Width="58"
+                                Height="58"
+                                CornerRadius="16"
+                                Background="#201F1F">
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontSize="26"
+                                       FontFamily="Segoe Fluent Icons"
+                                       Foreground="#E5E2E1"
+                                       Text="&#xE710;" />
+                        </Border>
+                        <TextBlock Classes="projectCardTitle"
+                                   HorizontalAlignment="Center"
+                                   Text="{Binding Text.NewProject}" />
+                        <TextBlock Classes="projectCardMeta"
+                                   HorizontalAlignment="Center"
+                                   Text="{Binding Text.NewProjectSubtitle}" />
+                    </StackPanel>
+                </Button>
+
+                <ItemsControl ItemsSource="{Binding ImportedHistory}"
+                              IsVisible="{Binding ShowDashboardImportedProjects}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ImportedModelHistoryItemViewModel">
+                            <Button Classes="cardButton"
+                                    Width="356"
+                                    Height="348"
+                                    Margin="0,0,20,20"
+                                    Command="{Binding #DashboardRoot.DataContext.OpenRecentFileCommand}"
+                                    CommandParameter="{Binding FilePath}">
+                                <Grid RowDefinitions="202,*">
+                                    <Grid Grid.Row="0">
+                                        <Image Source="{Binding #DashboardRoot.DataContext.DashboardVillaImageSource}"
+                                               Stretch="UniformToFill" />
+                                        <Border HorizontalAlignment="Right"
+                                                VerticalAlignment="Top"
+                                                Margin="12"
+                                                Classes="engineBadge">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Ellipse Width="8" Height="8" Fill="#82CFFF" />
+                                                <TextBlock Classes="engineBadgeText" Text="{Binding #DashboardRoot.DataContext.Text.Brand}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+
+                                    <Grid Grid.Row="1" Margin="18,16,18,18" RowDefinitions="Auto,*">
+                                        <TextBlock Classes="projectCardTitle"
+                                                   Text="{Binding DisplayName}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <StackPanel Grid.Row="1" Spacing="6" VerticalAlignment="Bottom">
+                                            <TextBlock Classes="projectCardMono" Text="{Binding Summary}" />
+                                            <TextBlock Classes="projectCardMeta" Text="{Binding Meta}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <ItemsControl ItemsSource="{Binding DashboardReferenceProjects}"
+                              IsVisible="{Binding ShowDashboardReferenceProjects}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:WorkspaceProjectTemplateViewModel">
+                            <Button Classes="cardButton"
+                                    Width="356"
+                                    Height="348"
+                                    Margin="0,0,20,20"
+                                    Command="{Binding #DashboardRoot.DataContext.NewSceneCommand}">
+                                <Grid RowDefinitions="202,*">
+                                    <Grid Grid.Row="0">
+                                        <Image Source="{Binding PreviewImageSource}" Stretch="UniformToFill" />
+                                        <Border HorizontalAlignment="Right"
+                                                VerticalAlignment="Top"
+                                                Margin="12"
+                                                Classes="engineBadge">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Ellipse Width="8" Height="8" Fill="{Binding EngineAccentHex}" />
+                                                <TextBlock Classes="engineBadgeText" Text="{Binding EngineLabel}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+
+                                    <Grid Grid.Row="1" Margin="18,16,18,18" RowDefinitions="Auto,*">
+                                        <TextBlock Classes="projectCardTitle"
+                                                   Text="{Binding Title}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <StackPanel Grid.Row="1" Spacing="6" VerticalAlignment="Bottom">
+                                            <TextBlock Classes="projectCardMono" Text="{Binding Resolution}" />
+                                            <TextBlock Classes="projectCardMeta" Text="{Binding EditedText}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </WrapPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,5 +1,7 @@
 # Open Render -> Lumion-like Evolution Plan
 
+# USA SIEMPRE ESTA IMPORTACION PARA PRUEBAS: "C:\Users\Yetsin\Documents\Arquitectura\Planos de Mi Casa\OpenRender\Mi casa Revit 2026 - Vista 3D - RenderOpenRender.obj"
+
 Fecha: 2026-05-16
 
 ## Objetivo real

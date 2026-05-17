@@ -1,1104 +1,118 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:OpenRender.ViewModels"
-        xmlns:ctrl="using:OpenRender.Controls"
+        xmlns:sections="using:OpenRender.Views.Sections"
         x:Class="OpenRender.Views.MainWindow"
         x:Name="RootWindow"
-        Title="Open Render Studio"
+        Title="OpenRender"
         Width="1600"
-        Height="920"
-        MinWidth="1180"
+        Height="1280"
+        MinWidth="1280"
         MinHeight="760"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         CanResize="True"
-        Background="#07101C"
+        Background="#131313"
         SystemDecorations="BorderOnly">
+
+    <Window.Styles>
+        <StyleInclude Source="avares://OpenRender.UI/Styles/WorkspaceStyles.axaml" />
+    </Window.Styles>
 
     <Design.DataContext>
         <vm:MainViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,*,Auto" ClipToBounds="True">
-
-        <!-- ========================================================= -->
-        <!-- TOP BAR - Lumion-style compact header                    -->
-        <!-- ========================================================= -->
+    <Grid RowDefinitions="56,*">
         <Border Grid.Row="0"
-                Height="44"
-                Background="#101821"
-                BorderBrush="#263646"
+                Background="#131313"
+                BorderBrush="#3E4850"
                 BorderThickness="0,0,0,1"
+                Padding="20,0"
                 PointerPressed="HeaderBar_PointerPressed">
-            <Grid ColumnDefinitions="Auto,*,Auto" Margin="10,0,8,0">
-
+            <Grid ColumnDefinitions="Auto,*,Auto">
                 <StackPanel Grid.Column="0"
                             Orientation="Horizontal"
-                            Spacing="12"
-                            VerticalAlignment="Center">
-                    <Border Width="24"
-                            Height="24"
-                            CornerRadius="7"
-                            Background="#E8F3F6">
-                        <TextBlock Text="L"
-                                   FontSize="15"
-                                   FontWeight="Bold"
-                                   Foreground="#0D1721"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
-                    </Border>
+                            VerticalAlignment="Stretch"
+                            Spacing="24">
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <Button Classes="chromeIconButton"
+                                Command="{Binding ToggleLumionLeftRailCommand}"
+                                IsVisible="{Binding ShowMenuChrome}"
+                                Content="&#xE700;"
+                                VerticalAlignment="Center" />
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Classes="brandText"
+                                   Text="{Binding Text.Brand}" />
+                    </StackPanel>
 
                     <StackPanel Orientation="Horizontal"
-                                Spacing="8"
-                                VerticalAlignment="Center">
-                        <TextBlock Text="Open Render Studio"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   Foreground="#EAF3F8" />
-                        <TextBlock Text="/"
-                                   FontSize="12"
-                                   Foreground="#637181" />
-                        <TextBlock Text="{Binding WorkspaceModeText}"
-                                   FontSize="12"
-                                   Foreground="#91A3B4" />
-                        <TextBlock Text="/"
-                                   FontSize="12"
-                                   Foreground="#637181" />
-                        <TextBlock Text="{Binding LumionModeBadge}"
-                                   FontSize="12"
-                                   FontWeight="Bold"
-                                   Foreground="#74B8D8" />
+                                Spacing="24"
+                                VerticalAlignment="Stretch">
+                        <Button Classes="topNavButton"
+                                Classes.active="{Binding IsDashboardSectionActive}"
+                                Command="{Binding SetWorkspaceSectionCommand}"
+                                CommandParameter="Dashboard"
+                                Content="{Binding Text.NavDashboard}" />
+                        <Button Classes="topNavButton"
+                                Classes.active="{Binding IsLibrarySectionActive}"
+                                Command="{Binding SetWorkspaceSectionCommand}"
+                                CommandParameter="Library"
+                                Content="{Binding Text.NavLibrary}" />
+                        <Button Classes="topNavButton"
+                                Classes.active="{Binding IsRenderSectionActive}"
+                                Command="{Binding SetWorkspaceSectionCommand}"
+                                CommandParameter="Render"
+                                Content="{Binding Text.NavRender}" />
+                        <Button Classes="topNavButton"
+                                Classes.active="{Binding IsCameraSectionActive}"
+                                Command="{Binding SetWorkspaceSectionCommand}"
+                                CommandParameter="Camera"
+                                Content="{Binding Text.NavCamera}" />
                     </StackPanel>
-                </StackPanel>
-
-                <StackPanel Grid.Column="1"
-                            Orientation="Horizontal"
-                            Spacing="8"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                    <Button Classes="topTool"
-                            Command="{Binding ImportFileCommand}"
-                            ToolTip.Tip="Importar modelo">
-                        <TextBlock Text="＋" />
-                    </Button>
-
-                    <Button Classes="topTool"
-                            Command="{Binding ReloadCurrentModelCommand}"
-                            IsVisible="{Binding HasLoadedSourceFile}"
-                            ToolTip.Tip="Reimportar modelo">
-                        <TextBlock Text="↻" />
-                    </Button>
-
-                    <Button Classes="topTool"
-                            Command="{Binding NewSceneCommand}"
-                            ToolTip.Tip="Nuevo estudio">
-                        <TextBlock Text="□" />
-                    </Button>
-
-                    <Border Classes="topDivider" />
-
-                    <Button Classes="topTool"
-                            Command="{Binding FrameAllCommand}"
-                            ToolTip.Tip="Encuadrar todo">
-                        <TextBlock Text="⛶" />
-                    </Button>
-
-                    <Button Classes="topTool"
-                            Command="{Binding ResetCameraCommand}"
-                            ToolTip.Tip="Reiniciar cámara">
-                        <TextBlock Text="◎" />
-                    </Button>
-
-                    <Button Classes="topTool"
-                            Command="{Binding PrepareLumionPresentationShotCommand}"
-                            ToolTip.Tip="Preparar toma tipo Lumion">
-                        <TextBlock Text="◉" />
-                    </Button>
-
-                    <Button Classes="topTool"
-                            Click="ToggleViewportFullScreen_Click"
-                            ToolTip.Tip="Viewport inmersivo F11">
-                        <TextBlock Text="⛶" />
-                    </Button>
-
-                    <Button Classes="topToolPrimary"
-                            Command="{Binding ExportRenderCommand}"
-                            ToolTip.Tip="Exportar imagen">
-                        <TextBlock Text="Export" />
-                    </Button>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2"
                             Orientation="Horizontal"
-                            Spacing="6"
+                            Spacing="8"
                             VerticalAlignment="Center">
-                    <Border Classes="perfBadge">
-                        <TextBlock Text="RT"
-                                   FontSize="11"
-                                   FontWeight="Bold"
-                                   Foreground="#A6D342" />
+                    <Border Width="320"
+                            Height="38"
+                            Margin="0,0,12,0"
+                            Classes="searchHost"
+                            IsVisible="{Binding ShowProjectSearchChrome}">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <TextBlock Margin="12,0,8,0"
+                                       VerticalAlignment="Center"
+                                       Classes="monoValue"
+                                       FontFamily="Segoe Fluent Icons"
+                                       Text="&#xE721;" />
+                            <TextBox Grid.Column="1"
+                                     Classes="searchBox chromeSearchBox"
+                                     Watermark="{Binding Text.SearchProjects}"
+                                     Text="{Binding ProjectSearchText}" />
+                        </Grid>
                     </Border>
 
-                    <Button Classes="windowControlBtn"
-                            Click="MinimizeWindow_Click"
-                            ToolTip.Tip="Minimizar">
-                        <TextBlock Text="−" />
-                    </Button>
-
-                    <Button Classes="windowControlBtn"
-                            Click="ToggleMaximizeWindow_Click"
-                            ToolTip.Tip="Maximizar">
-                        <TextBlock Text="□" />
-                    </Button>
-
-                    <Button Classes="windowControlBtnClose"
-                            Click="CloseWindow_Click"
-                            ToolTip.Tip="Cerrar">
-                        <TextBlock Text="×" />
-                    </Button>
+                    <Button Classes="chromeIconButton"
+                            Command="{Binding ExportRenderCommand}"
+                            Content="&#xE74E;" />
+                    <Button Classes="chromeIconButton"
+                            Command="{Binding AboutCommand}"
+                            Content="&#xE713;" />
+                    <Button Classes="chromeIconButton"
+                            Command="{Binding ShortcutsCommand}"
+                            Content="&#xE897;" />
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- ========================================================= -->
-        <!-- VIEWPORT + OVERLAYS                                      -->
-        <!-- ========================================================= -->
-        <Grid Grid.Row="1" Background="#0A121E">
-
-            <ctrl:StrideViewportControl x:Name="ViewportHost" />
-
-            <!-- Left vertical tool rail -->
-            <Border HorizontalAlignment="Left"
-                    VerticalAlignment="Stretch"
-                    Width="54"
-                    Background="#D50E1722"
-                    BorderBrush="#263646"
-                    BorderThickness="0,0,1,0">
-                <Grid RowDefinitions="Auto,*,Auto">
-                    <StackPanel Grid.Row="0" Spacing="8" Margin="7,12,7,8">
-                        <Button Classes="railBtnActive"
-                                Command="{Binding SetLumionToolCommand}"
-                                CommandParameter="Import"
-                                ToolTip.Tip="Importar">
-                            <TextBlock Text="⌂" />
-                        </Button>
-
-                        <Button Classes="railBtn"
-                                Command="{Binding SetLumionToolCommand}"
-                                CommandParameter="Build"
-                                ToolTip.Tip="Construir">
-                            <TextBlock Text="◇" />
-                        </Button>
-
-                        <Button Classes="railBtn"
-                                Command="{Binding SetLumionToolCommand}"
-                                CommandParameter="Materials"
-                                ToolTip.Tip="Materiales">
-                            <TextBlock Text="◐" />
-                        </Button>
-
-                        <Button Classes="railBtn"
-                                Command="{Binding SetLumionToolCommand}"
-                                CommandParameter="Objects"
-                                ToolTip.Tip="Objetos">
-                            <TextBlock Text="▦" />
-                        </Button>
-
-                        <Button Classes="railBtn"
-                                Command="{Binding SetLumionToolCommand}"
-                                CommandParameter="Nature"
-                                ToolTip.Tip="Naturaleza">
-                            <TextBlock Text="♣" />
-                        </Button>
-
-                        <Button Classes="railBtn"
-                                Command="{Binding SetLumionToolCommand}"
-                                CommandParameter="Weather"
-                                ToolTip.Tip="Clima">
-                            <TextBlock Text="☼" />
-                        </Button>
-
-                        <Button Classes="railBtn"
-                                Command="{Binding SetLumionToolCommand}"
-                                CommandParameter="Camera"
-                                ToolTip.Tip="Cámara">
-                            <TextBlock Text="▣" />
-                        </Button>
-
-                        <Button Classes="railBtn"
-                                Command="{Binding SetLumionToolCommand}"
-                                CommandParameter="Render"
-                                ToolTip.Tip="Render">
-                            <TextBlock Text="◉" />
-                        </Button>
-                    </StackPanel>
-
-                    <StackPanel Grid.Row="2" Spacing="8" Margin="7,8,7,12">
-                        <Button Classes="railBtn"
-                                Command="{Binding ToggleLumionHelpOverlayCommand}"
-                                ToolTip.Tip="Ayuda">
-                            <TextBlock Text="?" />
-                        </Button>
-
-                        <Button Classes="railBtn"
-                                Command="{Binding AboutCommand}"
-                                ToolTip.Tip="Acerca de">
-                            <TextBlock Text="i" />
-                        </Button>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <!-- Floating search orb -->
-            <Border HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    Margin="74,18,0,0"
-                    Width="64"
-                    Height="64"
-                    CornerRadius="32"
-                    Background="#E3121A25"
-                    BorderBrush="#33465A"
-                    BorderThickness="1">
-                <TextBlock Text="⌕"
-                           FontSize="28"
-                           Foreground="#EAF3F8"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center" />
-            </Border>
-
-            <!-- Left library / scene panel -->
-            <Border HorizontalAlignment="Left"
-                    VerticalAlignment="Stretch"
-                    Width="318"
-                    Margin="74,94,0,18"
-                    Classes="lumionPanel"
-                    IsVisible="{Binding ShowLumionAssetBrowser}">
-                <Grid RowDefinitions="Auto,Auto,Auto,*">
-                    <DockPanel Grid.Row="0" Margin="14,12,14,6">
-                        <StackPanel>
-                            <TextBlock Text="{Binding ActiveLumionToolTitle}"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Foreground="#F3F8FB" />
-                            <TextBlock Text="{Binding ActiveLumionToolSubtitle}"
-                                       FontSize="10"
-                                       Foreground="#91A3B4"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                        <Button DockPanel.Dock="Right"
-                                Classes="panelIconBtn"
-                                Command="{Binding ToggleLumionPanelCommand}">
-                            <TextBlock Text="×" />
-                        </Button>
-                    </DockPanel>
-
-                    <TextBox Grid.Row="1"
-                             Margin="14,4,14,12"
-                             Height="34"
-                             Watermark="Search"
-                             Text="{Binding SceneFilterText}"
-                             Classes="searchBox" />
-
-                    <ItemsControl Grid.Row="2"
-                                  Margin="14,0,14,12"
-                                  ItemsSource="{Binding LumionAssetCategories}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button Classes="categoryBtn"
-                                        Command="{Binding #RootWindow.DataContext.SetLumionAssetCategoryCommand}"
-                                        CommandParameter="{Binding Title}"
-                                        ToolTip.Tip="{Binding Subtitle}">
-                                    <TextBlock Text="{Binding Icon}" />
-                                </Button>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
-                    <TabControl Grid.Row="3" Classes="libraryTabs" MinHeight="0">
-                        <TabItem Header="Scene">
-                            <Grid RowDefinitions="Auto,*" Margin="12,6,12,12">
-                                <TextBlock Grid.Row="0"
-                                           Text="Objetos de escena"
-                                           FontSize="12"
-                                           Foreground="#91A3B4"
-                                           Margin="2,0,0,8" />
-
-                                <ListBox Grid.Row="1"
-                                         ItemsSource="{Binding SceneNodes}"
-                                         SelectedItem="{Binding SelectedSceneNode}"
-                                         Background="Transparent"
-                                         BorderThickness="0"
-                                         ScrollViewer.VerticalScrollBarVisibility="Auto">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Classes="assetItem">
-                                                <Grid ColumnDefinitions="Auto,*,Auto">
-                                                    <Border Width="38"
-                                                            Height="38"
-                                                            CornerRadius="8"
-                                                            Background="#223242">
-                                                        <TextBlock Text="{Binding Icon}"
-                                                                   FontSize="9"
-                                                                   FontWeight="Bold"
-                                                                   Foreground="#EAF3F8"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center" />
-                                                    </Border>
-
-                                                    <StackPanel Grid.Column="1"
-                                                                Margin="9,0,8,0"
-                                                                VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding Name}"
-                                                                   FontSize="12"
-                                                                   FontWeight="SemiBold"
-                                                                   Foreground="#EDF6FA"
-                                                                   TextTrimming="CharacterEllipsis" />
-                                                        <TextBlock Text="{Binding Subtitle}"
-                                                                   FontSize="10"
-                                                                   Foreground="#91A3B4"
-                                                                   TextTrimming="CharacterEllipsis" />
-                                                    </StackPanel>
-
-                                                    <CheckBox Grid.Column="2"
-                                                              IsVisible="{Binding SupportsVisibility}"
-                                                              IsChecked="{Binding IsVisible}"
-                                                              VerticalAlignment="Center" />
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </Grid>
-                        </TabItem>
-
-                        <TabItem Header="Imported">
-                            <ScrollViewer Margin="12,6,12,12"
-                                          VerticalScrollBarVisibility="Auto">
-                                <StackPanel Spacing="8">
-                                    <TextBlock Text="{Binding ImportedLibraryInfoText}"
-                                               FontSize="11"
-                                               Foreground="#91A3B4" />
-
-                                    <ItemsControl ItemsSource="{Binding ImportedHistory}"
-                                                  IsVisible="{Binding HasImportedHistory}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Button Classes="assetButton"
-                                                        Command="{Binding #RootWindow.DataContext.OpenRecentFileCommand}"
-                                                        CommandParameter="{Binding FilePath}">
-                                                    <StackPanel Spacing="3">
-                                                        <TextBlock Text="{Binding DisplayName}"
-                                                                   FontSize="12"
-                                                                   FontWeight="SemiBold" />
-                                                        <TextBlock Text="{Binding Summary}"
-                                                                   FontSize="10"
-                                                                   Foreground="#91A3B4"
-                                                                   TextWrapping="Wrap" />
-                                                        <TextBlock Text="{Binding Meta}"
-                                                                   FontSize="10"
-                                                                   Foreground="#647789"
-                                                                   TextWrapping="Wrap" />
-                                                    </StackPanel>
-                                                </Button>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-
-                                    <TextBlock Text="Aún no hay modelos guardados."
-                                               IsVisible="{Binding !HasImportedHistory}"
-                                               FontSize="11"
-                                               Foreground="#91A3B4" />
-                                </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
-                    </TabControl>
-                </Grid>
-            </Border>
-
-            <!-- Right inspector / tools panel -->
-            <Border HorizontalAlignment="Right"
-                    VerticalAlignment="Top"
-                    Width="338"
-                    Margin="0,32,18,0"
-                    Classes="lumionPanel"
-                    IsVisible="{Binding HasActiveLumionPanel}">
-                <Grid RowDefinitions="Auto,Auto,*">
-                    <DockPanel Grid.Row="0" Margin="14,12,14,8">
-                        <StackPanel>
-                            <TextBlock Text="Tools"
-                                       FontSize="15"
-                                       FontWeight="SemiBold"
-                                       Foreground="#F3F8FB" />
-                            <TextBlock Text="{Binding LumionNavigationHint}"
-                                       FontSize="10"
-                                       Foreground="#91A3B4"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-
-                        <Button DockPanel.Dock="Right"
-                                Classes="panelIconBtn"
-                                Command="{Binding ToggleLumionPanelCommand}">
-                            <TextBlock Text="›" />
-                        </Button>
-                    </DockPanel>
-
-                    <UniformGrid Grid.Row="1" Columns="6" Margin="14,0,14,12">
-                        <Button Classes="toolSquare" Command="{Binding SetViewCommand}" CommandParameter="3D"><TextBlock Text="3D" /></Button>
-                        <Button Classes="toolSquare" Command="{Binding SetViewCommand}" CommandParameter="Front"><TextBlock Text="F" /></Button>
-                        <Button Classes="toolSquare" Command="{Binding SetViewCommand}" CommandParameter="Right"><TextBlock Text="R" /></Button>
-                        <Button Classes="toolSquare" Command="{Binding SetViewCommand}" CommandParameter="Top"><TextBlock Text="T" /></Button>
-                        <Button Classes="toolSquare" Command="{Binding FrameAllCommand}"><TextBlock Text="⤢" /></Button>
-                        <Button Classes="toolSquare" Command="{Binding ResetCameraCommand}"><TextBlock Text="◎" /></Button>
-                    </UniformGrid>
-
-                    <TabControl Grid.Row="2" Classes="inspectorTabs" MinHeight="0">
-                        <TabItem Header="Material">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="14,8,14,14">
-                                <StackPanel Spacing="12">
-                                    <Border Classes="selectionCard">
-                                        <StackPanel Spacing="4">
-                                            <TextBlock Text="{Binding SelectedNodeTitle}"
-                                                       FontSize="13"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="#F3F8FB" />
-                                            <TextBlock Text="{Binding SelectedNodeDetails}"
-                                                       FontSize="11"
-                                                       Foreground="#91A3B4"
-                                                       TextWrapping="Wrap" />
-                                        </StackPanel>
-                                    </Border>
-
-                                    <StackPanel IsVisible="{Binding HasSelectedMaterial}" Spacing="10">
-                                        <DockPanel>
-                                            <TextBlock Text="Nombre" Width="74" Classes="labelText" />
-                                            <TextBlock Text="{Binding SelectedMaterial.Name}"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="#F3F8FB"
-                                                       TextWrapping="Wrap" />
-                                        </DockPanel>
-
-                                        <DockPanel>
-                                            <TextBlock Text="Origen" Width="74" Classes="labelText" />
-                                            <TextBlock Text="{Binding SelectedMaterialSourceText}"
-                                                       Foreground="#DCE8EF"
-                                                       TextWrapping="Wrap" />
-                                        </DockPanel>
-
-                                        <DockPanel>
-                                            <TextBlock Text="Uso" Width="74" Classes="labelText" />
-                                            <TextBlock Text="{Binding SelectedMaterialUsageText}"
-                                                       Foreground="#DCE8EF" />
-                                        </DockPanel>
-
-                                        <Border Height="1" Background="#2A3A4A" />
-
-                                        <DockPanel>
-                                            <TextBlock Text="R" Width="26" Classes="labelText" />
-                                            <TextBlock DockPanel.Dock="Right" Text="{Binding MaterialAlbedoR, StringFormat={}{0:F2}}" Classes="valueText" />
-                                            <Slider Minimum="0" Maximum="1" Value="{Binding MaterialAlbedoR}" Margin="8,0" />
-                                        </DockPanel>
-
-                                        <DockPanel>
-                                            <TextBlock Text="G" Width="26" Classes="labelText" />
-                                            <TextBlock DockPanel.Dock="Right" Text="{Binding MaterialAlbedoG, StringFormat={}{0:F2}}" Classes="valueText" />
-                                            <Slider Minimum="0" Maximum="1" Value="{Binding MaterialAlbedoG}" Margin="8,0" />
-                                        </DockPanel>
-
-                                        <DockPanel>
-                                            <TextBlock Text="B" Width="26" Classes="labelText" />
-                                            <TextBlock DockPanel.Dock="Right" Text="{Binding MaterialAlbedoB, StringFormat={}{0:F2}}" Classes="valueText" />
-                                            <Slider Minimum="0" Maximum="1" Value="{Binding MaterialAlbedoB}" Margin="8,0" />
-                                        </DockPanel>
-
-                                        <DockPanel>
-                                            <TextBlock Text="Rough" Width="54" Classes="labelText" />
-                                            <TextBlock DockPanel.Dock="Right" Text="{Binding SelectedMaterial.Roughness, StringFormat={}{0:F2}}" Classes="valueText" />
-                                            <Slider Minimum="0" Maximum="1" Value="{Binding SelectedMaterial.Roughness}" Margin="8,0" />
-                                        </DockPanel>
-
-                                        <DockPanel>
-                                            <TextBlock Text="Metal" Width="54" Classes="labelText" />
-                                            <TextBlock DockPanel.Dock="Right" Text="{Binding SelectedMaterial.Metallic, StringFormat={}{0:F2}}" Classes="valueText" />
-                                            <Slider Minimum="0" Maximum="1" Value="{Binding SelectedMaterial.Metallic}" Margin="8,0" />
-                                        </DockPanel>
-
-                                        <DockPanel>
-                                            <TextBlock Text="Opac" Width="54" Classes="labelText" />
-                                            <TextBlock DockPanel.Dock="Right" Text="{Binding SelectedMaterial.Opacity, StringFormat={}{0:F2}}" Classes="valueText" />
-                                            <Slider Minimum="0" Maximum="1" Value="{Binding SelectedMaterial.Opacity}" Margin="8,0" />
-                                        </DockPanel>
-                                    </StackPanel>
-
-                                    <TextBlock Text="Selecciona una superficie para editar su material."
-                                               IsVisible="{Binding !HasSelectedMaterial}"
-                                               FontSize="11"
-                                               Foreground="#91A3B4" />
-
-                                    <ComboBox ItemsSource="{Binding MaterialLibraryPresets}"
-                                              SelectedItem="{Binding SelectedLibraryMaterial}"
-                                              MaxDropDownHeight="320">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel>
-                                                    <TextBlock Text="{Binding Name}" />
-                                                    <TextBlock Text="{Binding Category}" FontSize="10" Foreground="#91A3B4" />
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
-
-                                    <TextBlock Text="{Binding SelectedLibraryMaterial.Description}"
-                                               FontSize="11"
-                                               TextWrapping="Wrap"
-                                               Foreground="#91A3B4" />
-
-                                    <Grid ColumnDefinitions="*,*">
-                                    <Button Grid.Column="0"
-                                            Margin="0,0,4,0"
-                                            Content="Aplicar"
-                                            Classes="accentActionBtn"
-                                            Command="{Binding ApplySelectedLibraryPresetCommand}"
-                                            IsVisible="{Binding HasSelectedMeshNode}" />
-                                    <Button Grid.Column="1"
-                                            Margin="4,0,0,0"
-                                            Content="Auto"
-                                            Classes="ghostActionBtn"
-                                            Command="{Binding AutoStyleSceneMaterialsCommand}" />
-                                    </Grid>
-
-                                    <WrapPanel>
-                                        <Button Content="Cantera" Classes="chipBtn" Command="{Binding ApplyMaterialPresetCommand}" CommandParameter="stone-cantera" />
-                                        <Button Content="Concreto" Classes="chipBtn" Command="{Binding ApplyMaterialPresetCommand}" CommandParameter="concrete-polished" />
-                                        <Button Content="Cerámica" Classes="chipBtn" Command="{Binding ApplyMaterialPresetCommand}" CommandParameter="ceramic-ivory" />
-                                        <Button Content="Nogal" Classes="chipBtn" Command="{Binding ApplyMaterialPresetCommand}" CommandParameter="wood-walnut" />
-                                        <Button Content="Vidrio" Classes="chipBtn" Command="{Binding ApplyMaterialPresetCommand}" CommandParameter="glass-clear" />
-                                    </WrapPanel>
-                                </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
-
-                        <TabItem Header="Camera">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="14,8,14,14">
-                                <StackPanel Spacing="12">
-                                    <DockPanel>
-                                        <TextBlock Text="FOV" Width="80" Classes="labelText" />
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding CameraFov, StringFormat={}{0:F0}°}" Classes="valueText" />
-                                        <Slider Minimum="20" Maximum="110" Value="{Binding CameraFov}" Margin="8,0" />
-                                    </DockPanel>
-
-                                    <DockPanel>
-                                        <TextBlock Text="Distancia" Width="80" Classes="labelText" />
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding CameraDistance, StringFormat={}{0:F1}}" Classes="valueText" />
-                                        <Slider Minimum="0.5" Maximum="2500" Value="{Binding CameraDistance}" Margin="8,0" />
-                                    </DockPanel>
-
-                                    <DockPanel>
-                                        <TextBlock Text="Velocidad" Width="80" Classes="labelText" />
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding NavigationSpeed, StringFormat={}{0:F1}}" Classes="valueText" />
-                                        <Slider Minimum="0.5" Maximum="250" Value="{Binding NavigationSpeed}" Margin="8,0" />
-                                    </DockPanel>
-
-                                    <WrapPanel>
-                                        <Button Content="3D" Classes="chipBtn" Command="{Binding SetViewCommand}" CommandParameter="3D" />
-                                        <Button Content="Front" Classes="chipBtn" Command="{Binding SetViewCommand}" CommandParameter="Front" />
-                                        <Button Content="Left" Classes="chipBtn" Command="{Binding SetViewCommand}" CommandParameter="Left" />
-                                        <Button Content="Right" Classes="chipBtn" Command="{Binding SetViewCommand}" CommandParameter="Right" />
-                                        <Button Content="Top" Classes="chipBtn" Command="{Binding SetViewCommand}" CommandParameter="Top" />
-                                    </WrapPanel>
-
-                                    <TextBlock Text="{Binding CameraFocusText}"
-                                               FontSize="11"
-                                               Foreground="#91A3B4"
-                                               TextWrapping="Wrap" />
-                                </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
-
-                        <TabItem Header="Photo">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="14,8,14,14">
-                                <StackPanel Spacing="12">
-                                    <WrapPanel>
-                                        <Button Content="HD" Classes="chipBtn" Command="{Binding SetResolutionPresetCommand}" CommandParameter="HD" />
-                                        <Button Content="FHD" Classes="chipBtn" Command="{Binding SetResolutionPresetCommand}" CommandParameter="FHD" />
-                                        <Button Content="QHD" Classes="chipBtn" Command="{Binding SetResolutionPresetCommand}" CommandParameter="QHD" />
-                                        <Button Content="4K" Classes="chipBtn" Command="{Binding SetResolutionPresetCommand}" CommandParameter="4K" />
-                                    </WrapPanel>
-
-                                    <WrapPanel>
-                                        <Button Content="PNG" Classes="chipBtn" Command="{Binding SetOutputFormatCommand}" CommandParameter="Png" />
-                                        <Button Content="JPEG" Classes="chipBtn" Command="{Binding SetOutputFormatCommand}" CommandParameter="Jpeg" />
-                                        <Button Content="TIFF" Classes="chipBtn" Command="{Binding SetOutputFormatCommand}" CommandParameter="Tiff" />
-                                    </WrapPanel>
-
-                                    <ItemsControl ItemsSource="{Binding LumionEnvironmentPresets}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Button Content="{Binding Title}"
-                                                        Classes="chipBtn"
-                                                        Command="{Binding #RootWindow.DataContext.ApplyLumionEnvironmentPresetCommand}"
-                                                        CommandParameter="{Binding PresetKey}" />
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-
-                                    <DockPanel>
-                                        <TextBlock Text="Sol" Width="84" Classes="labelText" />
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding SunIntensity, StringFormat={}{0:F1}}" Classes="valueText" />
-                                        <Slider Minimum="0" Maximum="5" Value="{Binding SunIntensity}" Margin="8,0" />
-                                    </DockPanel>
-
-                                    <DockPanel>
-                                        <TextBlock Text="Ambiente" Width="84" Classes="labelText" />
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding AmbientIntensity, StringFormat={}{0:F2}}" Classes="valueText" />
-                                        <Slider Minimum="0" Maximum="1" Value="{Binding AmbientIntensity}" Margin="8,0" />
-                                    </DockPanel>
-
-                                    <DockPanel>
-                                        <TextBlock Text="Exposición" Width="84" Classes="labelText" />
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding PhotoExposure, StringFormat={}{0:F2}}" Classes="valueText" />
-                                        <Slider Minimum="0.40" Maximum="2.20" Value="{Binding PhotoExposure}" Margin="8,0" />
-                                    </DockPanel>
-
-                                    <DockPanel>
-                                        <TextBlock Text="Gamma" Width="84" Classes="labelText" />
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding PhotoGamma, StringFormat={}{0:F2}}" Classes="valueText" />
-                                        <Slider Minimum="1.40" Maximum="2.80" Value="{Binding PhotoGamma}" Margin="8,0" />
-                                    </DockPanel>
-
-                                    <DockPanel>
-                                        <TextBlock Text="Contraste" Width="84" Classes="labelText" />
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding PhotoContrast, StringFormat={}{0:F2}}" Classes="valueText" />
-                                        <Slider Minimum="0.70" Maximum="1.40" Value="{Binding PhotoContrast}" Margin="8,0" />
-                                    </DockPanel>
-                                </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
-                    </TabControl>
-                </Grid>
-            </Border>
-
-            <!-- Bottom placement dock -->
-            <Border HorizontalAlignment="Left"
-                    VerticalAlignment="Bottom"
-                    Margin="74,0,0,18"
-                    Height="96"
-                    Width="740"
-                    Classes="bottomDock"
-                    IsVisible="{Binding IsBottomDockExpanded}">
-                <Grid ColumnDefinitions="Auto,*,Auto">
-                    <StackPanel Grid.Column="0" Margin="14,10" Spacing="8">
-                        <TextBlock Text="Build mode" FontSize="12" FontWeight="SemiBold" Foreground="#F3F8FB" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <ToggleButton Classes="dockToggle"
-                                          IsChecked="{Binding IsObjectSelectionMode, Mode=OneWay}"
-                                          Command="{Binding SetInteractionModeCommand}"
-                                          CommandParameter="Object">
-                                <TextBlock Text="Objects" />
-                            </ToggleButton>
-                            <ToggleButton Classes="dockToggle"
-                                          IsChecked="{Binding IsMaterialPaintMode, Mode=OneWay}"
-                                          Command="{Binding SetInteractionModeCommand}"
-                                          CommandParameter="Material">
-                                <TextBlock Text="Material" />
-                            </ToggleButton>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="1" Margin="8,10" Spacing="8">
-                        <TextBlock Text="Placement" FontSize="12" FontWeight="SemiBold" Foreground="#F3F8FB" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button Classes="placementBtn" Command="{Binding FrameAllCommand}"><TextBlock Text="Frame all" /></Button>
-                            <Button Classes="placementBtn" Command="{Binding ResetCameraCommand}"><TextBlock Text="Reset camera" /></Button>
-                            <Button Classes="placementBtn" Command="{Binding RenderCommand}"><TextBlock Text="Preview" /></Button>
-                            <Button Classes="placementBtn" Command="{Binding ExportRenderCommand}"><TextBlock Text="Export" /></Button>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="2" Margin="12,10,14,10" Width="180" Spacing="8">
-                        <TextBlock Text="Objects in scene" FontSize="11" Foreground="#91A3B4" />
-                        <TextBlock Text="{Binding SceneInfoText}"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   Foreground="#F3F8FB"
-                                   TextWrapping="Wrap" />
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <!-- Navigation hints -->
-            <StackPanel HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"
-                        Margin="0,0,18,22"
-                        Spacing="4">
-                <Border Classes="keyHint"><TextBlock Text="WASD" /></Border>
-                <Border Classes="keyHint"><TextBlock Text="QE" /></Border>
-                <Border Classes="keyHint"><TextBlock Text="RMB" /></Border>
-                <Border Classes="keyHint"><TextBlock Text="SCROLL" /></Border>
-            </StackPanel>
-
-            <!-- Help overlay -->
-            <Border HorizontalAlignment="Center"
-                    VerticalAlignment="Top"
-                    Margin="0,22,0,0"
-                    Padding="14,10"
-                    CornerRadius="8"
-                    Background="#D80D1723"
-                    BorderBrush="#33465A"
-                    BorderThickness="1"
-                    IsVisible="{Binding ShowLumionHelpOverlay}">
-                <TextBlock Text="WASD navega · RMB mira · LMB orbita · MMB panea · Scroll zoom · F encuadra · 1/3/7 vistas"
-                           FontSize="12"
-                           Foreground="#EAF3F8" />
-            </Border>
-
-            <!-- Empty state -->
-            <Border HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Padding="24,18"
-                    CornerRadius="18"
-                    Background="#D80D1723"
-                    BorderBrush="#33465A"
-                    BorderThickness="1"
-                    IsVisible="{Binding ShowEmptyState}">
-                <StackPanel Spacing="10" HorizontalAlignment="Center">
-                    <TextBlock Text="Viewport listo"
-                               FontSize="20"
-                               FontWeight="SemiBold"
-                               HorizontalAlignment="Center"
-                               Foreground="#F3F8FB" />
-                    <TextBlock Text="Importa un modelo para comenzar a montar la escena."
-                               FontSize="12"
-                               Foreground="#91A3B4"
-                               HorizontalAlignment="Center" />
-                    <Button Content="Importar modelo"
-                            Classes="accentActionBtn"
-                            Command="{Binding ImportFileCommand}" />
-                </StackPanel>
-            </Border>
-
-            <!-- Loading overlay -->
-            <Border Background="#D909111C" IsVisible="{Binding IsLoading}">
-                <StackPanel HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Width="340"
-                            Spacing="12">
-                    <TextBlock Text="Preparando geometría..."
-                               FontSize="18"
-                               FontWeight="SemiBold"
-                               HorizontalAlignment="Center"
-                               Foreground="#F3F8FB" />
-                    <ProgressBar Minimum="0"
-                                 Maximum="100"
-                                 Height="10"
-                                 Value="{Binding ProgressValue}" />
-                    <TextBlock Text="{Binding StatusText}"
-                               FontSize="12"
-                               HorizontalAlignment="Center"
-                               TextWrapping="Wrap"
-                               Foreground="#91A3B4" />
-                </StackPanel>
-            </Border>
+        <Grid Grid.Row="1">
+            <sections:DashboardView IsVisible="{Binding IsDashboardSectionActive}" />
+            <sections:LibraryView IsVisible="{Binding IsLibrarySectionActive}" />
+            <sections:RenderQueueView IsVisible="{Binding IsRenderSectionActive}" />
+            <sections:CameraWorkspaceView IsVisible="{Binding IsCameraSectionActive}" />
         </Grid>
-
-        <!-- ========================================================= -->
-        <!-- STATUS BAR                                               -->
-        <!-- ========================================================= -->
-        <Border Grid.Row="2"
-                Height="32"
-                Background="#101821"
-                BorderBrush="#263646"
-                BorderThickness="0,1,0,0"
-                Padding="12,0">
-            <Grid ColumnDefinitions="*,Auto,Auto" VerticalAlignment="Center">
-                <TextBlock Grid.Column="0"
-                           Text="{Binding StatusText}"
-                           FontSize="11"
-                           TextWrapping="NoWrap"
-                           TextTrimming="CharacterEllipsis"
-                           Foreground="#DCE8EF" />
-                <TextBlock Grid.Column="1"
-                           Margin="14,0,0,0"
-                           Text="{Binding CameraFocusText}"
-                           FontSize="11"
-                           Foreground="#91A3B4" />
-                <TextBlock Grid.Column="2"
-                           Margin="14,0,0,0"
-                           Text="{Binding RenderInfoText}"
-                           FontSize="11"
-                           Foreground="#91A3B4" />
-            </Grid>
-        </Border>
     </Grid>
-
-    <Window.Styles>
-        <Style Selector="Border.lumionPanel">
-            <Setter Property="Background" Value="#E1111A24" />
-            <Setter Property="BorderBrush" Value="#33465A" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-        </Style>
-
-        <Style Selector="Border.bottomDock">
-            <Setter Property="Background" Value="#E1111A24" />
-            <Setter Property="BorderBrush" Value="#33465A" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-        </Style>
-
-        <Style Selector="Button.topTool">
-            <Setter Property="Background" Value="#162231" />
-            <Setter Property="Foreground" Value="#EAF3F8" />
-            <Setter Property="BorderBrush" Value="#2C3E50" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="5" />
-            <Setter Property="MinWidth" Value="34" />
-            <Setter Property="Height" Value="30" />
-            <Setter Property="Padding" Value="10,0" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-        </Style>
-
-        <Style Selector="Button.topToolPrimary">
-            <Setter Property="Background" Value="#74B8D8" />
-            <Setter Property="Foreground" Value="#07111C" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="CornerRadius" Value="5" />
-            <Setter Property="Height" Value="30" />
-            <Setter Property="Padding" Value="14,0" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="FontWeight" Value="Bold" />
-        </Style>
-
-        <Style Selector="Border.topDivider">
-            <Setter Property="Width" Value="1" />
-            <Setter Property="Height" Value="22" />
-            <Setter Property="Background" Value="#2C3E50" />
-            <Setter Property="Margin" Value="4,0" />
-        </Style>
-
-        <Style Selector="Border.perfBadge">
-            <Setter Property="Background" Value="#17230E" />
-            <Setter Property="BorderBrush" Value="#4A7020" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="11" />
-            <Setter Property="Padding" Value="10,4" />
-        </Style>
-
-        <Style Selector="Button.windowControlBtn">
-            <Setter Property="Background" Value="#131D29" />
-            <Setter Property="Foreground" Value="#DCE8EF" />
-            <Setter Property="BorderBrush" Value="#2C3E50" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Width" Value="32" />
-            <Setter Property="Height" Value="28" />
-            <Setter Property="Padding" Value="0" />
-        </Style>
-
-        <Style Selector="Button.windowControlBtnClose">
-            <Setter Property="Background" Value="#3A1820" />
-            <Setter Property="Foreground" Value="#F3F8FB" />
-            <Setter Property="BorderBrush" Value="#743544" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Width" Value="32" />
-            <Setter Property="Height" Value="28" />
-            <Setter Property="Padding" Value="0" />
-        </Style>
-
-        <Style Selector="Button.railBtn, Button.railBtnActive">
-            <Setter Property="Width" Value="40" />
-            <Setter Property="Height" Value="38" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Foreground" Value="#DCE8EF" />
-            <Setter Property="BorderBrush" Value="#2C3E50" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="FontSize" Value="17" />
-        </Style>
-
-        <Style Selector="Button.railBtn">
-            <Setter Property="Background" Value="#15202D" />
-        </Style>
-
-        <Style Selector="Button.railBtnActive">
-            <Setter Property="Background" Value="#2B5D93" />
-        </Style>
-
-        <Style Selector="Button.panelIconBtn">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="#91A3B4" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Width" Value="30" />
-            <Setter Property="Height" Value="30" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="FontSize" Value="18" />
-        </Style>
-
-        <Style Selector="TextBox.searchBox">
-            <Setter Property="Background" Value="#0C131D" />
-            <Setter Property="Foreground" Value="#EAF3F8" />
-            <Setter Property="BorderBrush" Value="#2C3E50" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="3" />
-            <Setter Property="FontSize" Value="12" />
-        </Style>
-
-        <Style Selector="Button.categoryBtn">
-            <Setter Property="Width" Value="32" />
-            <Setter Property="Height" Value="30" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Margin" Value="2" />
-            <Setter Property="CornerRadius" Value="3" />
-            <Setter Property="Foreground" Value="#DCE8EF" />
-            <Setter Property="BorderBrush" Value="#2C3E50" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="FontSize" Value="10" />
-            <Setter Property="Background" Value="#151F2B" />
-        </Style>
-
-        <Style Selector="TabControl.libraryTabs, TabControl.inspectorTabs">
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-
-        <Style Selector="TabItem">
-            <Setter Property="Foreground" Value="#9DAEBC" />
-            <Setter Property="FontSize" Value="11" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-        </Style>
-
-        <Style Selector="Border.assetItem">
-            <Setter Property="Background" Value="#121C28" />
-            <Setter Property="BorderBrush" Value="#263646" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="8" />
-            <Setter Property="Margin" Value="0,0,0,8" />
-        </Style>
-
-        <Style Selector="Button.assetButton">
-            <Setter Property="Background" Value="#121C28" />
-            <Setter Property="Foreground" Value="#DCE8EF" />
-            <Setter Property="BorderBrush" Value="#263646" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="10" />
-            <Setter Property="HorizontalContentAlignment" Value="Left" />
-        </Style>
-
-        <Style Selector="Button.toolSquare">
-            <Setter Property="Background" Value="#151F2B" />
-            <Setter Property="Foreground" Value="#DCE8EF" />
-            <Setter Property="BorderBrush" Value="#2C3E50" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="3" />
-            <Setter Property="Width" Value="42" />
-            <Setter Property="Height" Value="38" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Margin" Value="3" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="FontWeight" Value="Bold" />
-        </Style>
-
-        <Style Selector="Border.selectionCard">
-            <Setter Property="Background" Value="#121C28" />
-            <Setter Property="BorderBrush" Value="#2C3E50" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="10" />
-        </Style>
-
-        <Style Selector="TextBlock.labelText">
-            <Setter Property="FontSize" Value="11" />
-            <Setter Property="Foreground" Value="#91A3B4" />
-        </Style>
-
-        <Style Selector="TextBlock.valueText">
-            <Setter Property="FontSize" Value="11" />
-            <Setter Property="Foreground" Value="#F3F8FB" />
-        </Style>
-
-        <Style Selector="Button.ghostActionBtn">
-            <Setter Property="Background" Value="#162231" />
-            <Setter Property="Foreground" Value="#EAF3F8" />
-            <Setter Property="BorderBrush" Value="#2C3E50" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="12,9" />
-            <Setter Property="FontSize" Value="11" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-        </Style>
-
-        <Style Selector="Button.accentActionBtn">
-            <Setter Property="Background" Value="#74B8D8" />
-            <Setter Property="Foreground" Value="#07111C" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="12,9" />
-            <Setter Property="FontSize" Value="11" />
-            <Setter Property="FontWeight" Value="Bold" />
-        </Style>
-
-        <Style Selector="Button.chipBtn">
-            <Setter Property="Background" Value="#162231" />
-            <Setter Property="Foreground" Value="#EAF3F8" />
-            <Setter Property="BorderBrush" Value="#2C3E50" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="10,7" />
-            <Setter Property="FontSize" Value="11" />
-            <Setter Property="Margin" Value="0,0,7,7" />
-        </Style>
-
-        <Style Selector="ToggleButton.dockToggle">
-            <Setter Property="Background" Value="#162231" />
-            <Setter Property="Foreground" Value="#EAF3F8" />
-            <Setter Property="BorderBrush" Value="#2C3E50" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="12,8" />
-            <Setter Property="FontSize" Value="11" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-        </Style>
-
-        <Style Selector="ToggleButton.dockToggle:checked">
-            <Setter Property="Background" Value="#2B5D93" />
-            <Setter Property="Foreground" Value="#FFFFFF" />
-        </Style>
-
-        <Style Selector="Button.placementBtn">
-            <Setter Property="Background" Value="#162231" />
-            <Setter Property="Foreground" Value="#EAF3F8" />
-            <Setter Property="BorderBrush" Value="#2C3E50" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="12,8" />
-            <Setter Property="FontSize" Value="11" />
-        </Style>
-
-        <Style Selector="Border.keyHint">
-            <Setter Property="Background" Value="#C8111A24" />
-            <Setter Property="BorderBrush" Value="#33465A" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="3" />
-            <Setter Property="Padding" Value="7,3" />
-        </Style>
-
-        <Style Selector="Border.keyHint TextBlock">
-            <Setter Property="Foreground" Value="#EAF3F8" />
-            <Setter Property="FontSize" Value="10" />
-            <Setter Property="FontWeight" Value="Bold" />
-        </Style>
-    </Window.Styles>
 </Window>
- 

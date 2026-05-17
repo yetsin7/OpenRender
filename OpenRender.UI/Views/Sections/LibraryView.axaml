@@ -1,0 +1,233 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:OpenRender.ViewModels"
+             x:Class="OpenRender.Views.Sections.LibraryView"
+             x:Name="LibraryRoot">
+    <Grid ColumnDefinitions="320,*,320" Background="#0E0E0E">
+        <Border Grid.Column="0"
+                Classes="appPanel"
+                BorderThickness="0,0,1,0"
+                Padding="16">
+            <Grid RowDefinitions="Auto,Auto,*,Auto">
+                <StackPanel Spacing="4">
+                    <TextBlock FontSize="18" FontWeight="Medium" Foreground="#E5E2E1" Text="{Binding Text.AssetLibrary}" />
+                    <TextBlock FontSize="12" FontWeight="Medium" Foreground="#BDC8D1" Text="{Binding Text.LibrarySubtitle}" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Margin="0,16" Spacing="8">
+                    <Border Classes="searchHost" Height="36">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <TextBlock Margin="12,0,8,0" VerticalAlignment="Center" FontFamily="Segoe Fluent Icons" Foreground="#BDC8D1" Text="&#xE721;" />
+                            <TextBox Grid.Column="1" Classes="searchBox chromeSearchBox" Watermark="{Binding Text.SearchAssets}" Text="{Binding LibrarySearchText}" />
+                        </Grid>
+                    </Border>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <Button Classes="ghostActionButton" Margin="0,0,4,0" Command="{Binding SetLibraryCategoryCommand}" CommandParameter="All Assets">
+                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE71C;" />
+                                <TextBlock Text="{Binding Text.Filter}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="1" Classes="ghostActionButton" Margin="4,0,0,0" Command="{Binding SetLibraryViewModeCommand}" CommandParameter="List">
+                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8CB;" />
+                                <TextBlock Text="{Binding Text.Sort}" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Spacing="4">
+                    <Button Classes="sideNavButton" Classes.active="{Binding IsLibraryAllAssetsCategoryActive}" Command="{Binding SetLibraryCategoryCommand}" CommandParameter="All Assets">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE71D;" />
+                            <TextBlock Text="{Binding Text.AllAssets}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="sideNavButton" Classes.active="{Binding IsLibraryNatureCategoryActive}" Command="{Binding SetLibraryCategoryCommand}" CommandParameter="Nature">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE736;" />
+                            <TextBlock Text="{Binding Text.Nature}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="sideNavButton" Classes.active="{Binding IsLibraryPeopleCategoryActive}" Command="{Binding SetLibraryCategoryCommand}" CommandParameter="People">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE716;" />
+                            <TextBlock Text="{Binding Text.People}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="sideNavButton" Classes.active="{Binding IsLibraryIndoorCategoryActive}" Command="{Binding SetLibraryCategoryCommand}" CommandParameter="Indoor">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE80F;" />
+                            <TextBlock Text="{Binding Text.Indoor}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="sideNavButton" Classes.active="{Binding IsLibraryOutdoorCategoryActive}" Command="{Binding SetLibraryCategoryCommand}" CommandParameter="Outdoor">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE724;" />
+                            <TextBlock Text="{Binding Text.Outdoor}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="sideNavButton" Classes.active="{Binding IsLibraryMaterialsCategoryActive}" Command="{Binding SetLibraryCategoryCommand}" CommandParameter="Materials">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE790;" />
+                            <TextBlock Text="{Binding Text.Materials}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <Border Grid.Row="3" BorderBrush="#3E4850" BorderThickness="0,1,0,0" Padding="0,16,0,0">
+                    <Button Classes="sideNavButton" Command="{Binding AboutCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE713;" />
+                            <TextBlock Text="{Binding Text.LibrarySettings}" />
+                        </StackPanel>
+                    </Button>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="16">
+            <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,24">
+                <Border BorderBrush="#3E4850" BorderThickness="0,0,0,1" Grid.ColumnSpan="2" VerticalAlignment="Bottom" />
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+                    <TextBlock FontSize="18" FontWeight="Medium" Foreground="#E5E2E1" Text="{Binding ActiveLibraryCategory}" />
+                    <Border Classes="metricPill">
+                        <TextBlock Classes="monoValue" Text="{Binding ActiveLibraryItemCountText}" />
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+                    <Button Classes="ghostActionButton" Command="{Binding RefreshLumionLibraryCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE896;" />
+                            <TextBlock Text="{Binding Text.SyncLibrary}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="segmentedButton" Classes.active="{Binding IsLibraryGridView}" Command="{Binding SetLibraryViewModeCommand}" CommandParameter="Grid" Content="&#xE80A;" FontFamily="Segoe Fluent Icons" />
+                    <Button Classes="segmentedButton" Classes.active="{Binding IsLibraryListView}" Command="{Binding SetLibraryViewModeCommand}" CommandParameter="List" Content="&#xE8FD;" FontFamily="Segoe Fluent Icons" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <ScrollViewer IsVisible="{Binding IsLibraryGridView}">
+                    <ItemsControl ItemsSource="{Binding VisibleAssetLibraryItems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:WorkspaceAssetItemViewModel">
+                                <Button Classes="cardButton"
+                                        Classes.active="{Binding IsSelected}"
+                                        Width="260"
+                                        Height="220"
+                                        Margin="0,0,16,16"
+                                        Command="{Binding #LibraryRoot.DataContext.SelectWorkspaceAssetCommand}"
+                                        CommandParameter="{Binding Title}">
+                                    <StackPanel>
+                                        <Grid Height="146">
+                                            <Image Source="{Binding #LibraryRoot.DataContext.ReferenceImageSource}" Stretch="UniformToFill" Opacity="0.9" />
+                                            <Border Background="#1A000000" />
+                                            <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" Padding="4" CornerRadius="2" Background="#CC121212" IsVisible="{Binding IsSelected}">
+                                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE73E;" Foreground="#00AEEF" />
+                                            </Border>
+                                        </Grid>
+                                        <StackPanel Margin="10" Spacing="5">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock FontSize="12" FontWeight="Medium" Foreground="#E5E2E1" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Column="1" Classes="monoValue" Text="{Binding Kind}" />
+                                            </Grid>
+                                            <Border Classes="metricPill" HorizontalAlignment="Left">
+                                                <TextBlock Classes="monoValue" FontSize="10" Text="{Binding Badge}" />
+                                            </Border>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <ScrollViewer IsVisible="{Binding IsLibraryListView}">
+                    <ItemsControl ItemsSource="{Binding VisibleAssetLibraryItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:WorkspaceAssetItemViewModel">
+                                <Button Classes="queueRowButton"
+                                        Classes.active="{Binding IsSelected}"
+                                        Margin="0,0,0,12"
+                                        Command="{Binding #LibraryRoot.DataContext.SelectWorkspaceAssetCommand}"
+                                        CommandParameter="{Binding Title}">
+                                    <Grid ColumnDefinitions="112,*,Auto">
+                                        <Image Width="112" Height="63" Source="{Binding #LibraryRoot.DataContext.ReferenceImageSource}" Stretch="UniformToFill" Opacity="0.86" />
+                                        <StackPanel Grid.Column="1" Margin="14,0,0,0" Spacing="6" VerticalAlignment="Center">
+                                            <TextBlock FontSize="14" FontWeight="Medium" Foreground="#E5E2E1" Text="{Binding Title}" />
+                                            <Border Classes="metricPill" HorizontalAlignment="Left">
+                                                <TextBlock Classes="monoValue" Text="{Binding Badge}" />
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Classes="monoValue" VerticalAlignment="Center" Text="{Binding Kind}" />
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+
+        <Border Grid.Column="2" Classes="appPanel" BorderThickness="1,0,0,0">
+            <ScrollViewer>
+                <StackPanel>
+                    <Border Background="#131313" BorderBrush="#3E4850" BorderThickness="0,0,0,1" Padding="16">
+                        <StackPanel Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock FontSize="18" FontWeight="Medium" Foreground="#E5E2E1" Text="{Binding Text.Properties}" />
+                                <Button Grid.Column="1" Classes="chromeIconButton" Command="{Binding SetWorkspaceSectionCommand}" CommandParameter="Camera" Content="&#xE711;" />
+                            </Grid>
+                            <Border Background="#353534" BorderBrush="#3E4850" BorderThickness="1" CornerRadius="2" Height="180" ClipToBounds="True">
+                                <Image Source="{Binding ReferenceImageSource}" Stretch="UniformToFill" />
+                            </Border>
+                            <TextBlock FontSize="18" FontWeight="Medium" Foreground="#E5E2E1" Text="{Binding SelectedWorkspaceAssetTitle}" TextWrapping="Wrap" />
+                            <TextBlock FontSize="12" FontWeight="Medium" Foreground="#BDC8D1" Text="{Binding SelectedWorkspaceAssetCategoryText}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Grid Margin="16,0" ColumnDefinitions="*,*,*">
+                        <Button Classes="tabButton active" Content="Info" />
+                        <Button Grid.Column="1" Classes="tabButton" Content="{Binding Text.Materials}" />
+                        <Button Grid.Column="2" Classes="tabButton" Content="Tags" />
+                    </Grid>
+
+                    <StackPanel Margin="16" Spacing="20">
+                        <Button Classes="primaryActionButton"
+                                IsEnabled="{Binding CanPlaceSelectedAssetInScene}"
+                                Command="{Binding PlaceSelectedAssetInSceneCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE710;" />
+                                <TextBlock Text="{Binding Text.PlaceInScene}" />
+                            </StackPanel>
+                        </Button>
+
+                        <StackPanel Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto"><TextBlock Classes="bodyText" Text="{Binding Text.Type}" /><TextBlock Grid.Column="1" Classes="monoValue" Text="{Binding SelectedWorkspaceAssetType}" /></Grid>
+                            <Grid ColumnDefinitions="*,Auto"><TextBlock Classes="bodyText" Text="{Binding Text.Polygons}" /><TextBlock Grid.Column="1" Classes="monoValue" Text="{Binding SelectedWorkspaceAssetBadge}" /></Grid>
+                            <Grid ColumnDefinitions="*,Auto"><TextBlock Classes="bodyText" Text="{Binding Text.FileSize}" /><TextBlock Grid.Column="1" Classes="monoValue" Text="{Binding SelectedWorkspaceAssetFileSize}" /></Grid>
+                            <Grid ColumnDefinitions="*,Auto"><TextBlock Classes="bodyText" Text="{Binding Text.Lods}" /><TextBlock Grid.Column="1" Classes="monoValue" Text="{Binding SelectedWorkspaceAssetLodCount}" /></Grid>
+                            <Grid ColumnDefinitions="*,Auto"><TextBlock Classes="bodyText" Text="{Binding Text.Author}" /><TextBlock Grid.Column="1" Classes="monoValue" Foreground="#82CFFF" Text="{Binding SelectedWorkspaceAssetAuthor}" /></Grid>
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="sectionTitle" Text="{Binding Text.Notes}" />
+                            <Border Classes="propertyCard">
+                                <TextBlock FontSize="13" Foreground="#E5E2E1" TextWrapping="Wrap" LineHeight="20" Text="{Binding SelectedWorkspaceAssetNotes}" />
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

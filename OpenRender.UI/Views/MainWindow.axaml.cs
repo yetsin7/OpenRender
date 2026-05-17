@@ -5,7 +5,6 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using OpenRender.Controls;
 using OpenRender.ViewModels;
 
 namespace OpenRender.Views;
@@ -141,6 +140,7 @@ public partial class MainWindow : Window
         FocusViewport();
 
         var options = LaunchContext.Options;
+        vm.ApplyStartupWorkspace(options.StartSection, options.StartTool);
 
         if (string.IsNullOrWhiteSpace(options.StartupFilePath))
             return;
@@ -158,7 +158,7 @@ public partial class MainWindow : Window
     {
         Dispatcher.UIThread.Post(() =>
         {
-            this.FindControl<StrideViewportControl>("ViewportHost")?.Focus();
+            Focus();
         }, DispatcherPriority.Background);
     }
 

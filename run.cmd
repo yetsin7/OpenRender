@@ -1,1 +1,1 @@
-dotnet run --project OpenRender.csproj
+dotnet run

@@ -1,4 +1,5 @@
-using OpenRender.Core.Scene;
+using OpenRender.Materials;
+using OpenRender.Scene;
 
 namespace OpenRender.Services;
 

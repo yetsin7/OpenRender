@@ -1,6 +1,7 @@
 using System.Numerics;
 using System.Text.Json;
-using OpenRender.Core.Scene;
+using OpenRender.Materials;
+using OpenRender.Scene;
 
 namespace OpenRender.Services;
 
@@ -144,7 +145,7 @@ public sealed class StudioLibraryStore
                 SourceMaterialName = material.SourceName ?? material.Name,
                 DisplayMaterialName = material.Name,
                 PresetKey = material.PresetKey,
-                Category = material.Category,
+                Category = material.Category.ToString(),
                 Albedo = FloatVector3.FromVector3(material.Albedo),
                 Metallic = material.Metallic,
                 Roughness = material.Roughness,

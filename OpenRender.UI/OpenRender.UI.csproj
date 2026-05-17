@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationIcon />
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <StartupObject>OpenRender.Program</StartupObject>
   </PropertyGroup>
 
@@ -17,6 +18,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Silk.NET.Vulkan" Version="2.21.0" />
     <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.21.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,6 +38,7 @@
     <Content Include="Assets\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <AvaloniaResource Include="Assets\Reference\**" />
   </ItemGroup>
 
 </Project>

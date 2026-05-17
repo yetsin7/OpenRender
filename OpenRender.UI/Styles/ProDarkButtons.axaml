@@ -1,0 +1,193 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style Selector="Button.chromeIconButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="#BDC8D1" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="MinWidth" Value="32" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+        <Setter Property="FontSize" Value="19" />
+    </Style>
+
+    <Style Selector="Button.chromeIconButton:pointerover">
+        <Setter Property="Foreground" Value="#82CFFF" />
+        <Setter Property="Background" Value="#353534" />
+    </Style>
+
+    <Style Selector="Button.topNavButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="#BDC8D1" />
+        <Setter Property="BorderThickness" Value="0,0,0,2" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.topNavButton:pointerover">
+        <Setter Property="Foreground" Value="#82CFFF" />
+    </Style>
+
+    <Style Selector="Button.topNavButton.active">
+        <Setter Property="Foreground" Value="#82CFFF" />
+        <Setter Property="BorderBrush" Value="#82CFFF" />
+    </Style>
+
+    <Style Selector="Button.sideNavButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="#BDC8D1" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+
+    <Style Selector="Button.sideNavButton:pointerover">
+        <Setter Property="Background" Value="#2A2A2A" />
+        <Setter Property="Foreground" Value="#E5E2E1" />
+    </Style>
+
+    <Style Selector="Button.sideNavButton.active">
+        <Setter Property="Background" Value="#00AEEF" />
+        <Setter Property="Foreground" Value="#003E58" />
+    </Style>
+
+    <Style Selector="Button.primaryActionButton">
+        <Setter Property="Background" Value="#00AEEF" />
+        <Setter Property="Foreground" Value="#003E58" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.primaryActionButton:pointerover">
+        <Setter Property="Background" Value="#23B9F2" />
+    </Style>
+
+    <Style Selector="Button.ghostActionButton">
+        <Setter Property="Background" Value="#201F1F" />
+        <Setter Property="Foreground" Value="#E5E2E1" />
+        <Setter Property="BorderBrush" Value="#3E4850" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style Selector="Button.ghostActionButton:pointerover">
+        <Setter Property="BorderBrush" Value="#82CFFF" />
+        <Setter Property="Foreground" Value="#82CFFF" />
+    </Style>
+
+    <Style Selector="Button.segmentedButton">
+        <Setter Property="Background" Value="#201F1F" />
+        <Setter Property="Foreground" Value="#E5E2E1" />
+        <Setter Property="BorderBrush" Value="#3E4850" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.segmentedButton.active">
+        <Setter Property="Background" Value="#1A00AEEF" />
+        <Setter Property="Foreground" Value="#82CFFF" />
+        <Setter Property="BorderBrush" Value="#82CFFF" />
+    </Style>
+
+    <Style Selector="Button.tabButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="#BDC8D1" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0,0,0,2" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="CornerRadius" Value="0" />
+    </Style>
+
+    <Style Selector="Button.tabButton.active">
+        <Setter Property="Foreground" Value="#82CFFF" />
+        <Setter Property="BorderBrush" Value="#82CFFF" />
+    </Style>
+
+    <Style Selector="Button.cardButton">
+        <Setter Property="Background" Value="#1E1E1E" />
+        <Setter Property="Foreground" Value="#E5E2E1" />
+        <Setter Property="BorderBrush" Value="#333333" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <Style Selector="Button.cardButton:pointerover">
+        <Setter Property="BorderBrush" Value="#82CFFF" />
+    </Style>
+
+    <Style Selector="Button.cardButton.active">
+        <Setter Property="BorderBrush" Value="#82CFFF" />
+        <Setter Property="BorderThickness" Value="2" />
+    </Style>
+
+    <Style Selector="Button.queueRowButton">
+        <Setter Property="Background" Value="#201F1F" />
+        <Setter Property="Foreground" Value="#E5E2E1" />
+        <Setter Property="BorderBrush" Value="#3E4850" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <Style Selector="Button.queueRowButton.active">
+        <Setter Property="BorderBrush" Value="#82CFFF" />
+        <Setter Property="Background" Value="#1A00AEEF" />
+    </Style>
+
+    <Style Selector="Button.viewportHudButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="#BDC8D1" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+        <Setter Property="FontSize" Value="18" />
+    </Style>
+
+    <Style Selector="Button.viewportHudButton:pointerover">
+        <Setter Property="Background" Value="#353534" />
+        <Setter Property="Foreground" Value="#82CFFF" />
+    </Style>
+
+    <Style Selector="Button.viewportHudButton.active">
+        <Setter Property="Background" Value="#1A00AEEF" />
+        <Setter Property="Foreground" Value="#82CFFF" />
+    </Style>
+
+    <Style Selector="Button.propertyIconButton">
+        <Setter Property="Background" Value="#2A2A2A" />
+        <Setter Property="Foreground" Value="#BDC8D1" />
+        <Setter Property="BorderBrush" Value="#3E4850" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+</Styles>

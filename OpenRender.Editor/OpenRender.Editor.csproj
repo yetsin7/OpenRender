@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\OpenRender.Engine\OpenRender.Engine.csproj" />
     <ProjectReference Include="..\OpenRender.Scene\OpenRender.Scene.csproj" />
+    <ProjectReference Include="..\OpenRender.Tools\OpenRender.Tools.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenRender - Lighting &amp; Environment</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#ffb876",
+                        "on-background": "#e5e2e1",
+                        "on-secondary": "#303030",
+                        "tertiary-fixed-dim": "#ffb876",
+                        "on-secondary-fixed": "#1b1b1c",
+                        "secondary-container": "#474746",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "inverse-surface": "#e5e2e1",
+                        "error-container": "#93000a",
+                        "on-primary": "#00344b",
+                        "on-primary-fixed-variant": "#004c6b",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container-highest": "#353534",
+                        "primary-fixed": "#c6e7ff",
+                        "primary-container": "#00aeef",
+                        "outline-variant": "#3e4850",
+                        "on-secondary-container": "#b7b5b4",
+                        "on-surface-variant": "#bdc8d1",
+                        "on-surface": "#e5e2e1",
+                        "tertiary-container": "#ea8c21",
+                        "error": "#ffb4ab",
+                        "secondary": "#c8c6c5",
+                        "on-tertiary-fixed": "#2d1600",
+                        "secondary-fixed": "#e5e2e1",
+                        "primary-fixed-dim": "#82cfff",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#201f1f",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "on-tertiary": "#4b2800",
+                        "inverse-primary": "#00658d",
+                        "surface-variant": "#353534",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-bright": "#393939",
+                        "on-tertiary-container": "#572f00",
+                        "background": "#131313",
+                        "on-secondary-fixed-variant": "#474746",
+                        "on-primary-fixed": "#001e2d",
+                        "surface-tint": "#82cfff",
+                        "primary": "#82cfff",
+                        "on-primary-container": "#003e58",
+                        "surface-container-high": "#2a2a2a",
+                        "surface": "#131313",
+                        "on-error": "#690005",
+                        "outline": "#87929b",
+                        "inverse-on-surface": "#313030",
+                        "surface-dim": "#131313",
+                        "tertiary-fixed": "#ffdcc0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "panel-width": "320px",
+                        "toolbar-height": "56px",
+                        "xl": "48px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "mono-sm": ["JetBrains Mono"],
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "mono-sm": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "label-sm": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for dark theme panels */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #353534; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #474746; }
+        
+        /* Slider styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            background: #82cfff;
+            cursor: pointer;
+            margin-top: -5px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 2px;
+            cursor: pointer;
+            background: #3e4850;
+            border-radius: 1px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background h-screen w-full overflow-hidden flex flex-col font-body-md text-body-md">
+<!-- TopNavBar -->
+<header class="bg-background dark:bg-background border-b border-outline-variant flex justify-between items-center h-toolbar-height px-md w-full shrink-0 z-50 sticky top-0">
+<div class="flex items-center gap-md">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors duration-200 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<a class="font-headline-md text-headline-md font-bold text-primary dark:text-primary tracking-tight" href="{{DATA:SCREEN:SCREEN_2}}">OpenRender</a>
+</div>
+<nav class="hidden md:flex items-center gap-lg h-full">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 h-full flex items-center border-b-2 border-transparent" href="{{DATA:SCREEN:SCREEN_2}}">Dashboard</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 h-full flex items-center border-b-2 border-transparent" href="{{DATA:SCREEN:SCREEN_11}}">Library</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 h-full flex items-center border-b-2 border-transparent" href="{{DATA:SCREEN:SCREEN_7}}">Render</a>
+<a class="text-primary font-medium hover:text-primary transition-colors duration-200 h-full flex items-center border-b-2 border-primary" href="{{DATA:SCREEN:SCREEN_13}}">Camera</a>
+</nav>
+<div class="flex items-center gap-sm">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors duration-200 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined">save</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors duration-200 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors duration-200 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden relative">
+<!-- Left SideNavBar (Assets/Content) -->
+<aside class="bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant h-full w-[320px] flex flex-col p-md gap-md shrink-0 z-10 hidden lg:flex">
+<div class="flex items-center gap-sm mb-4">
+<div class="w-10 h-10 rounded bg-surface-variant flex items-center justify-center shrink-0 border border-outline-variant overflow-hidden">
+<span class="material-symbols-outlined text-outline">image</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Project Alpha</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">V-Ray Engine Active</span>
+</div>
+</div>
+<nav class="flex flex-col gap-xs flex-1">
+<a class="flex items-center gap-sm text-on-surface-variant p-sm hover:bg-surface-variant dark:hover:bg-surface-variant transition-all rounded-lg" href="SCREEN_13">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="font-label-md text-label-md">Content</span>
+</a>
+<a class="flex items-center gap-sm text-on-surface-variant p-sm hover:bg-surface-variant dark:hover:bg-surface-variant transition-all rounded-lg" href="SCREEN_9">
+<span class="material-symbols-outlined" data-icon="texture">texture</span>
+<span class="font-label-md text-label-md">Materials</span>
+</a>
+<a class="flex items-center gap-sm text-on-surface-variant p-sm hover:bg-surface-variant dark:hover:bg-surface-variant transition-all rounded-lg" href="SCREEN_13">
+<span class="material-symbols-outlined" data-icon="terrain">terrain</span>
+<span class="font-label-md text-label-md">Landscape</span>
+</a>
+<a class="flex items-center gap-sm bg-primary-container text-on-primary-container rounded-lg p-sm border-l-4 border-primary scale-95 duration-100" href="SCREEN_15">
+<span class="material-symbols-outlined fill" data-icon="wb_sunny">wb_sunny</span>
+<span class="font-label-md text-label-md font-bold">Weather</span>
+</a>
+<a class="flex items-center gap-sm text-on-surface-variant p-sm hover:bg-surface-variant dark:hover:bg-surface-variant transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+<span class="font-label-md text-label-md">Layers</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-sm pt-4 border-t border-outline-variant">
+<button class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-2 rounded font-bold hover:opacity-90 transition-opacity" onclick="location.href='SCREEN_7'">Render Image</button>
+<div class="flex gap-2 justify-center mt-2">
+<button class="p-2 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="library_books">library_books</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Central Viewport -->
+<main class="flex-1 bg-surface-container-lowest relative overflow-hidden flex flex-col items-center justify-center p-md">
+<!-- Main Render Image -->
+<div class="w-full h-full rounded-xl border border-outline-variant overflow-hidden relative shadow-lg shadow-black/50 flex items-center justify-center bg-black">
+<img alt="High-quality 3D architectural render of a modern glass villa at sunset, realistic lighting, soft shadows, reflections in a pool, professional visualization style, 4k resolution, clean composition" class="w-full h-full object-contain object-center" src="https://lh3.googleusercontent.com/aida/ADBb0ugHHtAtHcLcxW12MaxEDMnVMSFmGQDVRpNOQnit9F0SCrgRzsPPB2VR_eTBkIL50LD0f92Gvdj1OenzMISdRaTs3Y_wW15dJiee1ys-wyMy679DccwJZV8aDpHt1vFHocweebzHz_miDfzK017y88ShtemtD9PjAyKrRuvxttPLovABlsPoLoqosU-CV0XvvEE9yMP5rZZxXjGcLSTtS9pyXq9PLop5nyUV3aP7LKmL-dscVzn7Rthdew"/>
+<!-- Viewport HUD Overlay -->
+<div class="absolute top-4 left-4 bg-surface-container/80 backdrop-blur-md border border-outline-variant/50 rounded-lg p-2 flex gap-2">
+<button class="w-8 h-8 rounded bg-surface-variant text-primary flex items-center justify-center border border-primary/30">
+<span class="material-symbols-outlined text-[18px]">camera_alt</span>
+</button>
+<button class="w-8 h-8 rounded hover:bg-surface-variant text-on-surface-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[18px]">videocam</span>
+</button>
+<div class="w-px bg-outline-variant mx-1 my-1"></div>
+<button class="w-8 h-8 rounded hover:bg-surface-variant text-on-surface-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[18px]">360</span>
+</button>
+</div>
+<div class="absolute bottom-4 right-4 bg-surface-container/80 backdrop-blur-md border border-outline-variant/50 rounded-lg px-3 py-1.5 flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">FPS: 60 | RT: Active</span>
+</div>
+</div>
+</main>
+<!-- Right SideNavBar (Properties/Inspector) -->
+<aside class="bg-surface-container-low dark:bg-surface-container-low border-l border-outline-variant h-full w-[320px] flex flex-col shrink-0 z-10 overflow-y-auto">
+<!-- Context Header -->
+<div class="p-md border-b border-outline-variant bg-surface-container sticky top-0 z-10">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center shrink-0 border border-outline-variant">
+<span class="material-symbols-outlined text-outline text-[16px]">public</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Environment</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Global Lighting Setup</span>
+</div>
+</div>
+<!-- Secondary Tabs -->
+<div class="flex mt-4 gap-4 border-b border-outline-variant pb-0">
+<button class="font-label-md text-label-md text-primary border-b-2 border-primary pb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">light_mode</span> Sky
+                    </button>
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors pb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">cloud</span> Weather
+                    </button>
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors pb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">blur_on</span> Effects
+                    </button>
+</div>
+</div>
+<!-- Property Panels -->
+<div class="p-md flex flex-col gap-6">
+<!-- Sun Position Group -->
+<div class="bg-surface-container rounded-lg border border-outline-variant overflow-hidden">
+<div class="bg-surface-variant p-2 px-3 border-b border-outline-variant flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">explore</span> Sun Position
+                        </span>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px] cursor-pointer">keyboard_arrow_down</span>
+</div>
+<div class="p-sm flex flex-col gap-4">
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-end">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Azimuth</label>
+<span class="font-mono-sm text-mono-sm text-primary">215°</span>
+</div>
+<input class="mt-1" max="360" min="0" type="range" value="215"/>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-end">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Height (Altitude)</label>
+<span class="font-mono-sm text-mono-sm text-primary">15°</span>
+</div>
+<input class="mt-1" max="90" min="-90" type="range" value="15"/>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-end">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Sun Brightness</label>
+<span class="font-mono-sm text-mono-sm text-on-surface">1.2</span>
+</div>
+<input class="mt-1" max="5" min="0" step="0.1" type="range" value="1.2"/>
+</div>
+</div>
+</div>
+<!-- Sky Settings Group -->
+<div class="bg-surface-container rounded-lg border border-outline-variant overflow-hidden">
+<div class="bg-surface-variant p-2 px-3 border-b border-outline-variant flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">wallpaper</span> HDRI Environment
+                        </span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-7 h-4 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="p-sm flex flex-col gap-3">
+<div class="grid grid-cols-2 gap-2">
+<div class="aspect-video bg-surface-variant rounded border border-primary relative overflow-hidden cursor-pointer group">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+<span class="absolute bottom-1 left-1 z-20 font-label-sm text-label-sm text-white">Sunset 01</span>
+<div class="absolute top-1 right-1 z-20 w-3 h-3 bg-primary rounded-full border border-black"></div>
+</div>
+<div class="aspect-video bg-surface-variant rounded border border-outline-variant relative overflow-hidden cursor-pointer group hover:border-on-surface-variant transition-colors">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+<span class="absolute bottom-1 left-1 z-20 font-label-sm text-label-sm text-white">Clear Day</span>
+</div>
+<div class="aspect-video bg-surface-variant rounded border border-outline-variant relative overflow-hidden cursor-pointer group hover:border-on-surface-variant transition-colors">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+<span class="absolute bottom-1 left-1 z-20 font-label-sm text-label-sm text-white">Overcast</span>
+</div>
+<div class="aspect-video bg-surface-variant rounded border border-outline-variant relative overflow-hidden cursor-pointer group hover:border-on-surface-variant transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-outline-variant">add</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 mt-2">
+<div class="flex justify-between items-end">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Rotation</label>
+<span class="font-mono-sm text-mono-sm text-on-surface">45°</span>
+</div>
+<input class="mt-1" max="360" min="0" type="range" value="45"/>
+</div>
+</div>
+</div>
+<!-- Rendering Settings -->
+<div class="bg-surface-container rounded-lg border border-outline-variant overflow-hidden">
+<div class="bg-surface-variant p-2 px-3 border-b border-outline-variant flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">memory</span> Illumination
+                        </span>
+</div>
+<div class="p-sm flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<label class="font-label-sm text-label-sm text-on-surface">Global Illumination</label>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-7 h-4 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<label class="font-label-sm text-label-sm text-on-surface">Hardware Ray Tracing</label>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-7 h-4 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex flex-col gap-1 mt-1">
+<div class="flex justify-between items-end">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Bounces</label>
+<span class="font-mono-sm text-mono-sm text-on-surface">16</span>
+</div>
+<input class="mt-1" max="32" min="1" type="range" value="16"/>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</body></html>

@@ -1,0 +1,6 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StyleInclude Source="avares://OpenRender.UI/Styles/ProDarkTokens.axaml" />
+    <StyleInclude Source="avares://OpenRender.UI/Styles/ProDarkButtons.axaml" />
+    <StyleInclude Source="avares://OpenRender.UI/Styles/ProDarkSurfaces.axaml" />
+</Styles>

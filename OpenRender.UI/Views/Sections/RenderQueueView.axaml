@@ -1,0 +1,133 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:OpenRender.ViewModels"
+             x:Class="OpenRender.Views.Sections.RenderQueueView"
+             x:Name="RenderQueueRoot">
+    <Grid ColumnDefinitions="*,320" Background="#0E0E0E">
+        <Grid Grid.Column="0" RowDefinitions="Auto,*">
+            <Border Background="#201F1F"
+                    BorderBrush="#3E4850"
+                    BorderThickness="0,0,1,1"
+                    Padding="16">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock FontSize="18" FontWeight="Medium" Foreground="#E5E2E1" Text="{Binding Text.RenderQueue}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                        <Button Classes="propertyIconButton" Command="{Binding PauseSelectedRenderQueueJobCommand}" Content="&#xE769;" />
+                        <Button Classes="propertyIconButton" Command="{Binding RemoveSelectedRenderQueueJobCommand}" Content="&#xE74D;" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Row="1">
+                <StackPanel Margin="16" Spacing="8">
+                    <ItemsControl ItemsSource="{Binding RenderQueueJobs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:WorkspaceRenderJobViewModel">
+                                <Button Classes="queueRowButton"
+                                        Classes.active="{Binding IsSelected}"
+                                        Margin="0,0,0,8"
+                                        Command="{Binding #RenderQueueRoot.DataContext.SelectRenderQueueJobCommand}"
+                                        CommandParameter="{Binding Title}">
+                                    <StackPanel Spacing="12">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <Border Width="48" Height="48" Background="#353534" BorderBrush="#87929B" BorderThickness="1" CornerRadius="2">
+                                                <TextBlock FontFamily="Segoe Fluent Icons" Text="{Binding IconGlyph}" FontSize="20" Foreground="#BDC8D1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+
+                                            <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center" Spacing="4">
+                                                <TextBlock FontSize="13" FontWeight="Medium" Foreground="#E5E2E1" Text="{Binding Title}" />
+                                                <TextBlock Classes="monoValue" Text="{Binding Meta}" />
+                                            </StackPanel>
+
+                                            <Border Grid.Column="2" Background="#1A00AEEF" CornerRadius="2" Padding="8,4" VerticalAlignment="Top">
+                                                <TextBlock FontSize="11" FontWeight="Medium" Foreground="#82CFFF" Text="{Binding Status}" />
+                                            </Border>
+                                        </Grid>
+
+                                        <StackPanel Spacing="4">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Classes="monoValue" Text="{Binding Progress, StringFormat='{}{0:0}% Complete'}" />
+                                                <TextBlock Grid.Column="1" Classes="monoValue" Text="{Binding Timing}" />
+                                            </Grid>
+                                            <ProgressBar Classes="darkProgress" Minimum="0" Maximum="100" Value="{Binding Progress}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <Border Grid.Column="1"
+                Classes="appPanel"
+                BorderThickness="1,0,0,0">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <Border BorderBrush="#3E4850" BorderThickness="0,0,0,1" Padding="16">
+                    <StackPanel>
+                        <TextBlock FontSize="18" FontWeight="Medium" Foreground="#E5E2E1" Text="{Binding Text.ExportSettings}" />
+                        <TextBlock FontSize="12" FontWeight="Medium" Foreground="#BDC8D1" Text="{Binding SelectedRenderQueueJobTitle}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <ScrollViewer Grid.Row="1">
+                    <StackPanel Margin="16" Spacing="24">
+                        <StackPanel Spacing="8">
+                            <TextBlock Classes="sectionTitle" Text="{Binding Text.Resolution}" />
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+                                <Button Classes="segmentedButton" Classes.active="{Binding IsResolutionHd}" Margin="0,0,4,4" Command="{Binding SetResolutionPresetCommand}" CommandParameter="HD" Content="1080p" />
+                                <Button Grid.Column="1" Classes="segmentedButton" Classes.active="{Binding IsResolution4K}" Margin="4,0,0,4" Command="{Binding SetResolutionPresetCommand}" CommandParameter="4K" Content="4K" />
+                                <Button Grid.Row="1" Classes="segmentedButton" Classes.active="{Binding IsResolution8K}" Margin="0,4,4,0" Command="{Binding SetResolutionPresetCommand}" CommandParameter="8K" Content="8K" />
+                                <Button Grid.Row="1" Grid.Column="1" Classes="segmentedButton" Margin="4,4,0,0" Content="Custom" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,Auto,*" Margin="0,4,0,0">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Classes="monoValue" Text="{Binding Text.Width}" />
+                                    <TextBox Classes="propertyInput" Text="{Binding ExportWidthText}" IsReadOnly="True" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" FontFamily="Segoe Fluent Icons" Text="&#xE71B;" Foreground="#BDC8D1" FontSize="16" VerticalAlignment="Bottom" Margin="8,0,8,8" />
+                                <StackPanel Grid.Column="2" Spacing="4">
+                                    <TextBlock Classes="monoValue" Text="{Binding Text.Height}" />
+                                    <TextBox Classes="propertyInput" Text="{Binding ExportHeightText}" IsReadOnly="True" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Classes="sectionTitle" Text="{Binding Text.Format}" />
+                            <TextBox Classes="propertyInput" FontFamily="avares://Avalonia.Fonts.Inter#Inter" Text="{Binding SelectedExportFormatLabel}" IsReadOnly="True" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Classes="sectionTitle" Text="{Binding Text.FrameRate}" />
+                            <Grid ColumnDefinitions="*,*,*">
+                                <Button Classes="segmentedButton" Classes.active="{Binding IsFrameRate24}" Margin="0,0,4,0" Command="{Binding SetFrameRateCommand}" CommandParameter="24" Content="24" />
+                                <Button Grid.Column="1" Classes="segmentedButton" Classes.active="{Binding IsFrameRate30}" Margin="4,0" Command="{Binding SetFrameRateCommand}" CommandParameter="30" Content="30" />
+                                <Button Grid.Column="2" Classes="segmentedButton" Classes.active="{Binding IsFrameRate60}" Margin="4,0,0,0" Command="{Binding SetFrameRateCommand}" CommandParameter="60" Content="60" />
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Classes="sectionTitle" Text="{Binding Text.OutputPath}" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBox Classes="propertyInput" Text="{Binding RenderOutputPath}" />
+                                <Button Grid.Column="1" Classes="propertyIconButton" Margin="4,0,0,0" Command="{Binding AboutCommand}" Content="&#xE838;" />
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Border Grid.Row="2" BorderBrush="#3E4850" BorderThickness="0,1,0,0" Padding="16">
+                    <Button Classes="primaryActionButton" Command="{Binding ExportRenderCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE768;" />
+                            <TextBlock Text="{Binding Text.StartRender}" />
+                        </StackPanel>
+                    </Button>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

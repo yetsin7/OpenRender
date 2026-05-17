@@ -1,0 +1,72 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style Selector="Border.appPanel">
+        <Setter Property="Background" Value="#1C1B1B" />
+        <Setter Property="BorderBrush" Value="#3E4850" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="Border.searchHost">
+        <Setter Property="Background" Value="#0F0F0F" />
+        <Setter Property="BorderBrush" Value="#3E4850" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Height" Value="38" />
+    </Style>
+
+    <Style Selector="Border.propertyCard">
+        <Setter Property="Background" Value="#201F1F" />
+        <Setter Property="BorderBrush" Value="#3E4850" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Padding" Value="12" />
+    </Style>
+
+    <Style Selector="Border.engineBadge">
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Padding" Value="7,5" />
+        <Setter Property="BorderBrush" Value="#333333" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Background" Value="#CC121212" />
+    </Style>
+
+    <Style Selector="Border.metricPill">
+        <Setter Property="Background" Value="#353534" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Padding" Value="8,4" />
+    </Style>
+
+    <Style Selector="Border.viewportHudCard">
+        <Setter Property="Background" Value="#E6201F1F" />
+        <Setter Property="BorderBrush" Value="#3E4850" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="2" />
+    </Style>
+
+    <Style Selector="Button.dashedCard">
+        <Setter Property="BorderBrush" Value="#4B5966" />
+        <Setter Property="BorderThickness" Value="2" />
+    </Style>
+
+    <Style Selector="Border.viewportSelection">
+        <Setter Property="Background" Value="#1400AEEF" />
+        <Setter Property="BorderBrush" Value="#82CFFF" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+    </Style>
+
+    <Style Selector="ListBox.sceneHierarchy">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style Selector="ListBox.sceneHierarchy ListBoxItem">
+        <Setter Property="Padding" Value="8,6" />
+        <Setter Property="Foreground" Value="#BDC8D1" />
+    </Style>
+
+    <Style Selector="ListBox.sceneHierarchy ListBoxItem:selected">
+        <Setter Property="Background" Value="#1A00AEEF" />
+        <Setter Property="Foreground" Value="#82CFFF" />
+    </Style>
+</Styles>

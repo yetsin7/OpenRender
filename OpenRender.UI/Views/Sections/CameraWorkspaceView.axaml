@@ -1,0 +1,356 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="OpenRender.Views.Sections.CameraWorkspaceView"
+             x:Name="CameraRoot">
+    <Grid ColumnDefinitions="400,*,400" Background="#0E0E0E">
+        <Border Grid.Column="0"
+                Classes="appPanel"
+                BorderThickness="0,0,1,0"
+                Padding="20">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <StackPanel Spacing="20">
+                    <Grid ColumnDefinitions="60,*">
+                        <Border Width="60" Height="60" CornerRadius="2" ClipToBounds="True">
+                            <Image Source="{Binding ProjectAlphaThumbnailSource}" Stretch="UniformToFill" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="20,9,0,0" Spacing="2">
+                            <TextBlock FontSize="24"
+                                       FontWeight="SemiBold"
+                                       Foreground="#E5E2E1"
+                                       Text="{Binding CurrentProjectDisplayName}" />
+                            <TextBlock Classes="monoValue"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding CurrentProjectStatusText}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Height="1" Background="#3E4850" />
+
+                    <StackPanel Spacing="8">
+                        <Button Classes="sideNavButton"
+                                Classes.active="{Binding IsBuildPanelActive}"
+                                Command="{Binding SetLumionToolCommand}"
+                                CommandParameter="Build">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock FontFamily="Segoe Fluent Icons" FontSize="18" Text="&#xE71D;" />
+                                <TextBlock Text="{Binding Text.Content}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="sideNavButton"
+                                Classes.active="{Binding IsMaterialsPanelActive}"
+                                Command="{Binding SetLumionToolCommand}"
+                                CommandParameter="Materials">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock FontFamily="Segoe Fluent Icons" FontSize="18" Text="&#xE790;" />
+                                <TextBlock Text="{Binding Text.Materials}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="sideNavButton"
+                                Classes.active="{Binding IsNaturePanelActive}"
+                                Command="{Binding SetLumionToolCommand}"
+                                CommandParameter="Nature">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock FontFamily="Segoe Fluent Icons" FontSize="18" Text="&#xE8F1;" />
+                                <TextBlock Text="{Binding Text.Landscape}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="sideNavButton"
+                                Classes.active="{Binding IsWeatherPanelActive}"
+                                Command="{Binding SetLumionToolCommand}"
+                                CommandParameter="Weather">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock FontFamily="Segoe Fluent Icons" FontSize="18" Text="&#xE706;" />
+                                <TextBlock Text="{Binding Text.Weather}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="sideNavButton"
+                                Classes.active="{Binding IsObjectsPanelActive}"
+                                Command="{Binding SetLumionToolCommand}"
+                                CommandParameter="Objects">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock FontFamily="Segoe Fluent Icons" FontSize="18" Text="&#xE81E;" />
+                                <TextBlock Text="{Binding Text.Layers}" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="1" Margin="0,24,0,16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Classes="sectionTitle" Text="{Binding Text.SceneHierarchy}" />
+                        <Border Classes="propertyCard">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8D5;" Foreground="#E5E2E1" />
+                                    <TextBlock Grid.Column="1" Margin="8,0,0,0" Classes="monoValue" Foreground="#E5E2E1" Text="{Binding Text.Environment}" />
+                                </Grid>
+                                <Border Background="#1A00AEEF" CornerRadius="2" Padding="6">
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE838;" Foreground="#82CFFF" />
+                                        <TextBlock Grid.Column="1" Margin="8,0,0,0" Classes="monoValue" Foreground="#E5E2E1" Text="{Binding Text.Architecture}" />
+                                    </Grid>
+                                </Border>
+                                <Grid ColumnDefinitions="Auto,*" Margin="22,0,0,0">
+                                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8A3;" Foreground="#BDC8D1" />
+                                    <TextBlock Grid.Column="1" Margin="8,0,0,0" Classes="monoValue" Text="{Binding Text.SceneMainVilla}" />
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*" Margin="22,0,0,0">
+                                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8A3;" Foreground="#BDC8D1" />
+                                    <TextBlock Grid.Column="1" Margin="8,0,0,0" Classes="monoValue" Text="{Binding Text.ScenePoolDeck}" />
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8D5;" Foreground="#E5E2E1" />
+                                    <TextBlock Grid.Column="1" Margin="8,0,0,0" Classes="monoValue" Foreground="#E5E2E1" Text="{Binding Text.Lighting}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Grid Grid.Row="2" RowDefinitions="Auto,Auto" ColumnDefinitions="*,*">
+                    <Border Grid.ColumnSpan="2" Height="1" Margin="0,0,0,18" Background="#3E4850" />
+                    <Button Grid.ColumnSpan="2"
+                            Height="44"
+                            Classes="primaryActionButton"
+                            Command="{Binding SetWorkspaceSectionCommand}"
+                            CommandParameter="Render">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE768;" />
+                            <TextBlock Text="{Binding Text.RenderImage}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Row="1"
+                            Margin="0,14,8,0"
+                            Classes="ghostActionButton"
+                            Command="{Binding AboutCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE713;" />
+                            <TextBlock Text="{Binding Text.Settings}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="8,14,0,0"
+                            Classes="ghostActionButton"
+                            Command="{Binding SetWorkspaceSectionCommand}"
+                            CommandParameter="Library">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE82D;" />
+                            <TextBlock Text="{Binding Text.Library}" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1" ClipToBounds="True">
+            <Image Source="{Binding CameraPreviewImageSource}" Stretch="UniformToFill" />
+
+            <Border HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="20"
+                    Padding="12,10"
+                    Classes="viewportHudCard">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock FontFamily="Segoe Fluent Icons" Foreground="#82CFFF" Text="&#xE714;" />
+                    <TextBlock Classes="monoValue" FontSize="13" Foreground="#E5E2E1" Text="{Binding Text.CameraMain}" />
+                </StackPanel>
+            </Border>
+
+            <Border HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="20"
+                    Padding="4"
+                    Classes="viewportHudCard">
+                <StackPanel Orientation="Horizontal">
+                    <Button Classes="viewportHudButton" Classes.active="{Binding IsBuildPanelActive}" Content="&#xE80A;" />
+                    <Button Classes="viewportHudButton" Classes.active="{Binding IsMaterialsPanelActive}" Content="&#xE790;" />
+                    <Button Classes="viewportHudButton" Classes.active="{Binding IsWeatherPanelActive}" Content="&#xE706;" />
+                </StackPanel>
+            </Border>
+
+            <Border HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Width="78"
+                    Height="78"
+                    Classes="viewportSelection"
+                    IsVisible="{Binding ShowMaterialInspector}">
+                <Ellipse Width="10"
+                         Height="10"
+                         Fill="#82CFFF"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center" />
+            </Border>
+        </Grid>
+
+        <Border Grid.Column="2"
+                Classes="appPanel"
+                BorderThickness="1,0,0,0"
+                Padding="20">
+            <ScrollViewer>
+                <StackPanel Spacing="20">
+                    <Grid ColumnDefinitions="52,*">
+                        <Border Width="50" Height="50" CornerRadius="14" Background="#303030">
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Segoe Fluent Icons"
+                                       Foreground="#BDC8D1"
+                                       FontSize="24"
+                                       Text="&#xE77B;" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="18,4,0,0" Spacing="2">
+                            <TextBlock Classes="panelTitle" Text="{Binding Text.Inspector}" />
+                            <TextBlock Classes="monoValue" FontWeight="SemiBold" Text="{Binding Text.SelectionCube}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Height="1" Background="#3E4850" />
+
+                    <Grid ColumnDefinitions="*,*,*,*" Height="44">
+                        <Button Classes="tabButton" Classes.active="{Binding IsBuildPanelActive}" Content="&#xE7C2;" FontFamily="Segoe Fluent Icons" />
+                        <Button Grid.Column="1" Classes="tabButton" Classes.active="{Binding IsMaterialsPanelActive}" Content="&#xE790;" FontFamily="Segoe Fluent Icons" />
+                        <Button Grid.Column="2" Classes="tabButton" Classes.active="{Binding IsWeatherPanelActive}" Content="&#xE890;" FontFamily="Segoe Fluent Icons" />
+                        <Button Grid.Column="3" Classes="tabButton" Classes.active="{Binding IsObjectsPanelActive}" Content="&#xE81E;" FontFamily="Segoe Fluent Icons" />
+                    </Grid>
+
+                    <StackPanel Spacing="16" IsVisible="{Binding ShowMaterialInspector}">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Border Width="31" Height="31" CornerRadius="2" Background="#82CFFF" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="12,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="#E5E2E1"
+                                       Text="{Binding SelectedMaterialDisplayName}" />
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Foreground="#BDC8D1"
+                                       FontSize="20"
+                                       Text="⋮" />
+                        </Grid>
+
+                        <Border Classes="propertyCard">
+                            <StackPanel Spacing="10">
+                                <Grid ColumnDefinitions="*,78">
+                                    <TextBlock Foreground="#E5E2E1" Text="{Binding Text.Albedo}" />
+                                    <Border Grid.Column="1" Height="29" Background="#82CFFF" />
+                                </Grid>
+                                <Grid ColumnDefinitions="42,*">
+                                    <Button Classes="propertyIconButton" Content="&#xE91B;" />
+                                    <TextBox Grid.Column="1" Margin="10,0,0,0" Classes="propertyInput" Text="{Binding SelectedMaterialTextureName}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="propertyCard">
+                            <StackPanel Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Foreground="#E5E2E1" Text="{Binding Text.Roughness}" />
+                                    <TextBlock Grid.Column="1" Classes="monoValue" FontSize="14" Text="{Binding SelectedMaterialRoughnessText}" />
+                                </Grid>
+                                <Grid ColumnDefinitions="34,*">
+                                    <Button Classes="propertyIconButton" Width="30" Height="30" Content="&#xE790;" />
+                                    <Slider Grid.Column="1" Margin="10,0,0,0" Classes="workspaceSlider" Minimum="0" Maximum="1" Value="{Binding SelectedMaterial.Roughness}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="propertyCard">
+                            <StackPanel Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Foreground="#E5E2E1" Text="{Binding Text.Metalness}" />
+                                    <TextBlock Grid.Column="1" Classes="monoValue" FontSize="14" Text="{Binding SelectedMaterialMetalnessText}" />
+                                </Grid>
+                                <Grid ColumnDefinitions="34,*">
+                                    <Button Classes="propertyIconButton" Width="30" Height="30" Content="&#xE790;" />
+                                    <Slider Grid.Column="1" Margin="10,0,0,0" Classes="workspaceSlider" Minimum="0" Maximum="1" Value="{Binding SelectedMaterial.Metallic}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="propertyCard">
+                            <StackPanel Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Foreground="#E5E2E1" Text="{Binding Text.Normal}" />
+                                    <TextBlock Grid.Column="1" Classes="monoValue" FontSize="14" Text="{Binding SelectedMaterialNormalStrengthText}" />
+                                </Grid>
+                                <Grid ColumnDefinitions="42,*">
+                                    <Button Classes="propertyIconButton" Content="&#xE91B;" />
+                                    <TextBox Grid.Column="1" Margin="10,0,0,0" Classes="propertyInput" Text="{Binding SelectedMaterialNormalTextureName}" />
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#E5E2E1" Text="{Binding Text.Strength}" />
+                                    <Slider Grid.Column="1" Margin="12,0,0,0" Classes="workspaceSlider" Minimum="0" Maximum="2" Value="{Binding SelectedMaterial.NormalStrength}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel Spacing="16" IsVisible="{Binding IsBuildPanelActive}">
+                        <Button Classes="tabButton active" HorizontalContentAlignment="Center" Content="{Binding Text.Transform}" />
+                        <Border Classes="propertyCard">
+                            <StackPanel Spacing="10">
+                                <TextBlock Classes="sectionTitle" Text="{Binding Text.Location}" />
+                                <TextBox Classes="propertyInput" Text="{Binding SelectedNodePositionXText}" />
+                                <TextBox Classes="propertyInput" Text="{Binding SelectedNodePositionYText}" />
+                                <TextBox Classes="propertyInput" Text="{Binding SelectedNodePositionZText}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="propertyCard">
+                            <StackPanel Spacing="10">
+                                <TextBlock Classes="sectionTitle" Text="{Binding Text.Rotation}" />
+                                <TextBox Classes="propertyInput" Text="{Binding SelectedNodeRotationXText}" />
+                                <TextBox Classes="propertyInput" Text="{Binding SelectedNodeRotationYText}" />
+                                <TextBox Classes="propertyInput" Text="{Binding SelectedNodeRotationZText}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel Spacing="16" IsVisible="{Binding IsWeatherPanelActive}">
+                        <Grid ColumnDefinitions="*,*,*">
+                            <Button Classes="tabButton active" Content="{Binding Text.Sky}" />
+                            <Button Grid.Column="1" Classes="tabButton" Content="{Binding Text.Weather}" />
+                            <Button Grid.Column="2" Classes="tabButton" Content="{Binding Text.Effects}" />
+                        </Grid>
+                        <Border Classes="propertyCard">
+                            <StackPanel Spacing="10">
+                                <TextBlock Classes="sectionTitle" Text="{Binding Text.SunPosition}" />
+                                <Slider Classes="workspaceSlider" Minimum="0" Maximum="360" Value="{Binding SunAzimuth}" />
+                                <Slider Classes="workspaceSlider" Minimum="-90" Maximum="90" Value="{Binding SunAltitude}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="propertyCard">
+                            <StackPanel Spacing="10">
+                                <TextBlock Classes="sectionTitle" Text="{Binding Text.HdriEnvironment}" />
+                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+                                    <Border Height="72" Margin="0,0,4,4" Background="#58493A" />
+                                    <Border Grid.Column="1" Height="72" Margin="4,0,0,4" Background="#3A4A58" />
+                                    <Border Grid.Row="1" Height="72" Margin="0,4,4,0" Background="#5D5D65" />
+                                    <Border Grid.Row="1" Grid.Column="1" Height="72" Margin="4,4,0,0" Background="#252525" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel Spacing="16" IsVisible="{Binding IsNaturePanelActive}">
+                        <TextBlock Classes="sectionTitle" Text="{Binding Text.Landscape}" />
+                        <Border Classes="propertyCard">
+                            <StackPanel Spacing="10">
+                                <TextBlock Foreground="#E5E2E1" Text="{Binding Text.Terrain}" />
+                                <Slider Classes="workspaceSlider" Minimum="0" Maximum="1" Value="0.72" />
+                                <TextBlock Foreground="#E5E2E1" Text="{Binding Text.Vegetation}" />
+                                <Slider Classes="workspaceSlider" Minimum="0" Maximum="1" Value="0.48" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel Spacing="16" IsVisible="{Binding IsObjectsPanelActive}">
+                        <TextBlock Classes="sectionTitle" Text="{Binding Text.Layers}" />
+                        <ListBox Classes="sceneHierarchy" Height="260" ItemsSource="{Binding SceneNodes}" SelectedItem="{Binding SelectedSceneNode}" />
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

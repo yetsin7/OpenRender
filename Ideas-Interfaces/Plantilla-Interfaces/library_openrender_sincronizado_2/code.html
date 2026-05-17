@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenRender - Asset Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#ffb876",
+                    "on-background": "#e5e2e1",
+                    "on-secondary": "#303030",
+                    "tertiary-fixed-dim": "#ffb876",
+                    "on-secondary-fixed": "#1b1b1c",
+                    "secondary-container": "#474746",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "inverse-surface": "#e5e2e1",
+                    "error-container": "#93000a",
+                    "on-primary": "#00344b",
+                    "on-primary-fixed-variant": "#004c6b",
+                    "surface-container-lowest": "#0e0e0e",
+                    "surface-container-highest": "#353534",
+                    "primary-fixed": "#c6e7ff",
+                    "primary-container": "#00aeef",
+                    "outline-variant": "#3e4850",
+                    "on-secondary-container": "#b7b5b4",
+                    "on-surface-variant": "#bdc8d1",
+                    "on-surface": "#e5e2e1",
+                    "tertiary-container": "#ea8c21",
+                    "error": "#ffb4ab",
+                    "secondary": "#c8c6c5",
+                    "on-tertiary-fixed": "#2d1600",
+                    "secondary-fixed": "#e5e2e1",
+                    "primary-fixed-dim": "#82cfff",
+                    "on-error-container": "#ffdad6",
+                    "surface-container": "#201f1f",
+                    "on-tertiary-fixed-variant": "#6b3b00",
+                    "on-tertiary": "#4b2800",
+                    "inverse-primary": "#00658d",
+                    "surface-variant": "#353534",
+                    "surface-container-low": "#1c1b1b",
+                    "surface-bright": "#393939",
+                    "on-tertiary-container": "#572f00",
+                    "background": "#131313",
+                    "on-secondary-fixed-variant": "#474746",
+                    "on-primary-fixed": "#001e2d",
+                    "surface-tint": "#82cfff",
+                    "primary": "#82cfff",
+                    "on-primary-container": "#003e58",
+                    "surface-container-high": "#2a2a2a",
+                    "surface": "#131313",
+                    "on-error": "#690005",
+                    "outline": "#87929b",
+                    "inverse-on-surface": "#313030",
+                    "surface-dim": "#131313",
+                    "tertiary-fixed": "#ffdcc0"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "panel-width": "320px",
+                    "toolbar-height": "56px",
+                    "xl": "48px",
+                    "md": "16px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "mono-sm": [
+                            "JetBrains Mono"
+                    ],
+                    "label-sm": [
+                            "Inter"
+                    ],
+                    "headline-md": [
+                            "Inter"
+                    ],
+                    "headline-sm": [
+                            "Inter"
+                    ],
+                    "body-md": [
+                            "Inter"
+                    ],
+                    "label-md": [
+                            "Inter"
+                    ],
+                    "headline-lg": [
+                            "Inter"
+                    ],
+                    "body-lg": [
+                            "Inter"
+                    ]
+            },
+            "fontSize": {
+                    "mono-sm": [
+                            "12px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-sm": [
+                            "11px",
+                            {
+                                    "lineHeight": "1",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "1.3",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-sm": [
+                            "18px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "body-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "1.5",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-md": [
+                            "12px",
+                            {
+                                    "lineHeight": "1",
+                                    "letterSpacing": "0.02em",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-lg": [
+                            "16px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-background h-screen overflow-hidden flex flex-col font-body-md text-body-md">
+<!-- TopNavBar -->
+<header class="bg-background dark:bg-background border-b border-outline-variant flex justify-between items-center h-toolbar-height px-md w-full shrink-0 z-50 sticky top-0">
+<div class="flex items-center gap-md">
+<button class="p-2 hover:bg-surface-variant rounded-DEFAULT transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">menu</span>
+</button>
+<a class="font-headline-md text-headline-md font-bold text-primary dark:text-primary tracking-tight ml-2" href="{{DATA:SCREEN:SCREEN_2}}">OpenRender</a>
+<nav class="hidden md:flex items-center h-full gap-lg ml-xl">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 h-full flex items-center py-4" href="{{DATA:SCREEN:SCREEN_2}}">Dashboard</a>
+<a class="text-primary font-medium transition-colors duration-200 h-full flex items-center border-b-2 border-primary py-4" href="{{DATA:SCREEN:SCREEN_11}}">Library</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 h-full flex items-center py-4" href="{{DATA:SCREEN:SCREEN_7}}">Render</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 h-full flex items-center py-4" href="{{DATA:SCREEN:SCREEN_13}}">Camera</a>
+</nav>
+</div>
+<div class="flex items-center gap-sm text-on-surface-variant">
+<button class="p-2 hover:text-primary transition-colors duration-200 rounded-DEFAULT">
+<span class="material-symbols-outlined text-[20px]">save</span>
+</button>
+<button class="p-2 hover:text-primary transition-colors duration-200 rounded-DEFAULT">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+<button class="p-2 hover:text-primary transition-colors duration-200 rounded-DEFAULT">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden relative">
+<!-- Left SideNavBar (Library Categories) -->
+<aside class="hidden md:flex bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant flex-col p-md gap-md w-[320px] shrink-0 h-full overflow-y-auto">
+<div class="mb-sm">
+<div class="font-headline-sm text-headline-sm text-on-surface mb-xs">Asset Library</div>
+<div class="text-on-surface-variant font-label-md text-label-md">Browse and filter resources</div>
+</div>
+<!-- Search & Filters Container (Local to Library) -->
+<div class="flex flex-col gap-sm mb-md">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" data-icon="search">search</span>
+<input class="w-full bg-[#0F0F0F] border border-outline-variant rounded-DEFAULT py-xs pl-xl pr-sm text-on-surface focus:border-primary-container focus:outline-none transition-colors h-[36px] font-body-md text-body-md" placeholder="Search assets..." type="text"/>
+</div>
+<div class="flex gap-xs">
+<button class="flex-1 bg-surface-container border border-outline-variant hover:border-primary-container rounded-DEFAULT py-xs px-sm flex items-center justify-center gap-xs text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="filter_list">filter_list</span>
+<span class="font-label-md text-label-md">Filters</span>
+</button>
+<button class="flex-1 bg-surface-container border border-outline-variant hover:border-primary-container rounded-DEFAULT py-xs px-sm flex items-center justify-center gap-xs text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="sort">sort</span>
+<span class="font-label-md text-label-md">Sort</span>
+</button>
+</div>
+</div>
+<nav class="flex flex-col gap-xs flex-1">
+<a class="flex items-center gap-sm text-on-surface-variant p-sm hover:bg-surface-variant dark:hover:bg-surface-variant transition-all rounded-DEFAULT font-label-md text-label-md group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-on-surface" data-icon="category">category</span>
+<span class="group-hover:text-on-surface">All Assets</span>
+</a>
+<a class="flex items-center gap-sm bg-primary-container text-on-primary-container rounded-lg p-sm border-l-4 border-primary font-label-md text-label-md transition-all" href="{{DATA:SCREEN:SCREEN_11}}">
+<span class="material-symbols-outlined text-[20px]" data-icon="forest" data-weight="fill" style="font-variation-settings: 'FILL' 1;">forest</span>
+<span class="">Nature</span>
+</a>
+<a class="flex items-center gap-sm text-on-surface-variant p-sm hover:bg-surface-variant dark:hover:bg-surface-variant transition-all rounded-DEFAULT font-label-md text-label-md group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-on-surface" data-icon="person">person</span>
+<span class="group-hover:text-on-surface">People</span>
+</a>
+<a class="flex items-center gap-sm text-on-surface-variant p-sm hover:bg-surface-variant dark:hover:bg-surface-variant transition-all rounded-DEFAULT font-label-md text-label-md group" href="{{DATA:SCREEN:SCREEN_13}}">
+<span class="material-symbols-outlined text-[20px] group-hover:text-on-surface" data-icon="chair">chair</span>
+<span class="group-hover:text-on-surface">Indoor</span>
+</a>
+<a class="flex items-center gap-sm text-on-surface-variant p-sm hover:bg-surface-variant dark:hover:bg-surface-variant transition-all rounded-DEFAULT font-label-md text-label-md group" href="{{DATA:SCREEN:SCREEN_13}}">
+<span class="material-symbols-outlined text-[20px] group-hover:text-on-surface" data-icon="park">park</span>
+<span class="group-hover:text-on-surface">Outdoor</span>
+</a>
+<a class="flex items-center gap-sm text-on-surface-variant p-sm hover:bg-surface-variant dark:hover:bg-surface-variant transition-all rounded-DEFAULT font-label-md text-label-md group" href="{{DATA:SCREEN:SCREEN_9}}">
+<span class="material-symbols-outlined text-[20px] group-hover:text-on-surface" data-icon="texture">texture</span>
+<span class="group-hover:text-on-surface">Materials</span>
+</a>
+</nav>
+<div class="mt-auto pt-md border-t border-outline-variant flex flex-col gap-xs">
+<a class="flex items-center gap-sm text-on-surface-variant p-sm hover:bg-surface-variant dark:hover:bg-surface-variant transition-all rounded-DEFAULT font-label-md text-label-md group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-on-surface" data-icon="library_books">library_books</span>
+<span class="group-hover:text-on-surface">Library Settings</span>
+</a>
+</div>
+</aside>
+<!-- Main Viewport (Asset Grid) -->
+<main class="flex-1 bg-[#0A0A0A] overflow-y-auto p-md relative">
+<!-- Context Toolbar -->
+<div class="flex justify-between items-center mb-md pb-sm border-b border-outline-variant">
+<div class="flex items-center gap-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Nature</h2>
+<span class="text-on-surface-variant font-mono-sm text-mono-sm bg-surface-container-high px-2 py-1 rounded-DEFAULT">245 Items</span>
+</div>
+<div class="flex gap-sm">
+<button class="text-primary hover:text-primary-fixed transition-colors flex items-center gap-xs font-label-md text-label-md bg-surface-container px-sm py-xs rounded-DEFAULT border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="cloud_download">cloud_download</span>
+                        Sync Library
+                    </button>
+<div class="flex bg-surface-container rounded-DEFAULT border border-outline-variant overflow-hidden">
+<button class="p-xs bg-surface-variant text-on-surface transition-colors hover:bg-surface-container-high border-r border-outline-variant" title="Grid View">
+<span class="material-symbols-outlined text-[18px]" data-icon="grid_view" data-weight="fill" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-on-surface transition-colors hover:bg-surface-container-high" title="List View">
+<span class="material-symbols-outlined text-[18px]" data-icon="view_list">view_list</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bento Grid / Masonry-style Layout for Assets -->
+<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md pb-xl">
+<!-- Asset Card 1 (Active) -->
+<div class="bg-[#1E1E1E] border border-primary-container rounded-lg overflow-hidden group cursor-pointer relative shadow-[0_0_15px_rgba(0,174,239,0.15)] ring-1 ring-primary-container transition-all">
+<div class="absolute top-sm right-sm z-10 bg-[#121212]/80 backdrop-blur-sm rounded-DEFAULT p-xs border border-[#333]">
+<span class="material-symbols-outlined text-primary text-[16px]" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="aspect-video w-full bg-surface-container-highest relative overflow-hidden">
+<img alt="3D model of a deciduous tree in autumn" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity group-hover:scale-105 duration-500" data-alt="A highly detailed 3D render of a mature deciduous tree with vibrant orange and red autumn foliage. The lighting is studio-quality softbox, isolating the tree against a dark, neutral gray background. The overall aesthetic is hyper-realistic and tailored for professional architectural visualization software, fitting seamlessly into a high-end dark mode UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOb7zXilgpmGIXIPxBzPthKqxnxeiFw6HNiyk-my0hqIZRCQheEYqBtxe0m6fIFMtIwSNsBQmT_mVlNdS0mvdjHblkCgqc2BtfXkF4qL2n4wUEf2_n7Y6lYBxlpispjX5fMJblJFbLcJ1vYF1C9Pb74vAyMo2FLX8t_McXxOeHPGfgmWB4fb_JwYAJkj4ayEzipzF6tKRiAI2EAbMnl25jPkFiNHdKoqmqC6DNRe_Yb_8Kfy6H5sHmFsbxKEaE7SxSxNclLyMFgn8"/>
+</div>
+<div class="p-sm">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="font-label-md text-label-md text-on-surface truncate">Maple Tree - Autumn 01</h3>
+<span class="text-on-surface-variant font-mono-sm text-mono-sm">3D</span>
+</div>
+<div class="flex gap-xs mt-xs flex-wrap">
+<span class="bg-surface-container-highest text-on-surface-variant font-mono-sm text-mono-sm px-1.5 py-0.5 rounded-DEFAULT text-[10px]">High Poly</span>
+<span class="bg-surface-container-highest text-on-surface-variant font-mono-sm text-mono-sm px-1.5 py-0.5 rounded-DEFAULT text-[10px]">PBR</span>
+</div>
+</div>
+</div>
+<!-- Asset Card 2 -->
+<div class="bg-[#1E1E1E] border border-outline-variant hover:border-[#555] rounded-lg overflow-hidden group cursor-pointer transition-all">
+<div class="aspect-video w-full bg-surface-container-highest relative overflow-hidden">
+<img alt="3D model of a pine tree" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300" data-alt="A meticulously crafted 3D asset of an evergreen pine tree, featuring dense, realistic needles and a textured bark trunk. Captured under neutral, diffuse studio lighting on a dark backdrop, perfect for integration into professional 3D rendering pipelines. The visual tone is crisp, serious, and deeply technical." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_ecMZ5UJEHdLxD1pbRBpgRuaLR58HribG42GdImCmGBPywD39Nuh1DoGwS0tlWFTGX2qvsvLa56pXlYaRheMdeu0jSQ2ErOHDas2zongyVkN5MVPgfw8CUWDZXILATYvSzKrgsTpmhB-rSZTqhUUx5pUDnTWmqYzGMNYR-evalB-pc8x2_knP0bBSgu_TOcSCQp5D1gEdfS8HLVRBvfsxlA-nBbsMcCUNTq1bWG7jjk9sT-T-3COPDaPQEXJ1xql9wvbwaW7J_Cw"/>
+</div>
+<div class="p-sm">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="font-label-md text-label-md text-on-surface truncate">Scots Pine - Mature</h3>
+<span class="text-on-surface-variant font-mono-sm text-mono-sm">3D</span>
+</div>
+<div class="flex gap-xs mt-xs flex-wrap">
+<span class="bg-surface-container-highest text-on-surface-variant font-mono-sm text-mono-sm px-1.5 py-0.5 rounded-DEFAULT text-[10px]">Mid Poly</span>
+</div>
+</div>
+</div>
+<!-- Asset Card 3 (Material) -->
+<div class="bg-[#1E1E1E] border border-outline-variant hover:border-[#555] rounded-lg overflow-hidden group cursor-pointer transition-all col-span-1 lg:col-span-2 xl:col-span-1 row-span-2">
+<div class="aspect-square xl:aspect-[3/4] w-full bg-surface-container-highest relative overflow-hidden">
+<img alt="Seamless grass texture" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300" data-alt="A seamless, high-resolution 4K texture of lush, manicured green grass. The surface is evenly lit to showcase the intricate blade details and subsurface scattering properties. Rendered in a strict top-down orthographic view against a dark UI framework, conveying utility and premium asset quality for visualization." src="https://lh3.googleusercontent.com/aida-public/AB6AXuARwZLk_Kqzparm_tIHYm7gJg5f76LyhAHHMXJb5jElmAKfUV5Y6kWtglcOtVzeGW6AjaKfr5H4VSwCUQkWr8_maO211SBtf-7XaFXWi8sJmOqqgZwEOCtbjN5csngD3vehSbl4jS8WBY1UJdKueoHGORCzaZ5M9TIu2q-A8CEPbgkDOCv9OusUzngEHBUoltidMn5a87NqJaLrTyo_d53CXOiiSuS8ThxHHswGvX38Vudf0qMP3isXmnUAmDZOStf3O8AR1Aya36I"/>
+<div class="absolute bottom-sm left-sm bg-[#121212]/80 backdrop-blur-sm px-2 py-1 rounded-DEFAULT border border-[#333]">
+<span class="font-mono-sm text-mono-sm text-tertiary">4K Material</span>
+</div>
+</div>
+<div class="p-sm">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="font-label-md text-label-md text-on-surface truncate">Lawn Grass - Manicured</h3>
+<span class="text-on-surface-variant font-mono-sm text-mono-sm">MAT</span>
+</div>
+<p class="text-on-surface-variant font-body-md text-body-md text-[11px] mt-1 line-clamp-2">Includes Albedo, Normal, Roughness, and Displacement maps. Fully seamless tileable.</p>
+</div>
+</div>
+<!-- Asset Card 4 -->
+<div class="bg-[#1E1E1E] border border-outline-variant hover:border-[#555] rounded-lg overflow-hidden group cursor-pointer transition-all">
+<div class="aspect-video w-full bg-surface-container-highest relative overflow-hidden">
+<img alt="3D model of a potted plant" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300" data-alt="A precise 3D model of a monstera plant in a sleek, minimalist concrete pot. Lit with moody, dramatic directional lighting that highlights the glossy texture of the leaves and the porous surface of the pot. Set against a pitch-black background, aligning with a sophisticated, professional dark mode interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8z8GqOGW2-jr0MgXDQLibwIc6FcDBH_LvHw0db7fxaSnet9LxQwDOm-KB3Cmg3O1-z_RPKdfqWXwmQ9SVbdNUvcJ-96QnNHFzSKhdQx2uhmzKKU-UoiIpBsER-7WWOtv3jTGXtGEmb2MadRIaFfUxU0wgqonO9pQ8E6uKsxm952spRCFrEQFqfiurimQirh__wRpk06ZpY_y32ocpUldnYD5cFkhJoOYRBQSOT8vPfxVSqqHhv6AaoJXc8aT0GA-WWfgiBAbb5MY"/>
+</div>
+<div class="p-sm">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="font-label-md text-label-md text-on-surface truncate">Monstera Deliciosa</h3>
+<span class="text-on-surface-variant font-mono-sm text-mono-sm">3D</span>
+</div>
+</div>
+</div>
+<!-- Asset Card 5 (Dim/Inactive State) -->
+<div class="bg-[#1E1E1E] border border-[#222] rounded-lg overflow-hidden cursor-not-allowed opacity-50 relative">
+<div class="absolute inset-0 z-20 flex items-center justify-center">
+<div class="bg-[#121212]/90 backdrop-blur-sm px-sm py-xs rounded-DEFAULT border border-outline-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]" data-icon="cloud_off">cloud_off</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Not Downloaded</span>
+</div>
+</div>
+<div class="aspect-video w-full bg-surface-container-highest relative overflow-hidden">
+<div class="w-full h-full bg-surface-container"></div>
+</div>
+<div class="p-sm">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="font-label-md text-label-md text-on-surface-variant truncate">Oak Tree - Summer</h3>
+<span class="text-on-surface-variant font-mono-sm text-mono-sm">3D</span>
+</div>
+</div>
+</div>
+<!-- Asset Card 6 -->
+<div class="bg-[#1E1E1E] border border-outline-variant hover:border-[#555] rounded-lg overflow-hidden group cursor-pointer transition-all">
+<div class="aspect-video w-full bg-surface-container-highest relative overflow-hidden">
+<img alt="3D model of rocks" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300" data-alt="A cluster of highly detailed 3D sculpted river rocks, displaying varied textures, colors, and subtle moss growth. The lighting is cinematic and cool-toned, creating a sense of depth and realism against a deep black void. Designed to appeal to professional environment artists within a dark, utilitarian workspace." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOhQTUEHTqvtQZ1M0p8smF-Ra0lSn9PjHmeybEr6fSvnflYjkXjqyPaI-tpOta708zi3wAtz3Xzne0G9jU2UjaCausrH60Vrsz_m1L0EDpVM_WeA_ixuNLmkyMZ2M-P1fuAdxmFrkfIqdJK0qFE3V8eumyN_atuqD08vSjYAIu3y5CqiJZKBiEHoXqI6asK3rqoaBg4wa0_T4YV7Jgn78qQ-j2hn85eO6hRNUXbAdGMtyfvBBYz_7iqw0hmPafoqIpJZ8q53lHSac"/>
+</div>
+<div class="p-sm">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="font-label-md text-label-md text-on-surface truncate">River Rocks Cluster 02</h3>
+<span class="text-on-surface-variant font-mono-sm text-mono-sm">3D</span>
+</div>
+<div class="flex gap-xs mt-xs flex-wrap">
+<span class="bg-surface-container-highest text-on-surface-variant font-mono-sm text-mono-sm px-1.5 py-0.5 rounded-DEFAULT text-[10px]">Scan</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Right SideNavBar (Inspector / Details) -->
+<aside class="hidden xl:flex bg-surface-container-low dark:bg-surface-container-low border-l border-outline-variant flex-col w-[320px] shrink-0 h-full overflow-y-auto z-10 shadow-[-8px_0_24px_rgba(0,0,0,0.5)]">
+<!-- Context Header -->
+<div class="p-md border-b border-outline-variant bg-[#121212] sticky top-0 z-20">
+<div class="flex items-center justify-between mb-sm">
+<div class="font-headline-sm text-headline-sm text-on-surface">Properties</div>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="close">close</span>
+</button>
+</div>
+<div class="aspect-video w-full bg-surface-container-highest rounded-DEFAULT overflow-hidden mb-sm border border-outline-variant">
+<img alt="Preview of Maple Tree - Autumn 01" class="w-full h-full object-cover" data-alt="A close-up, high-resolution preview of a 3D maple tree model with autumn leaves. The image focuses on the intricate branch structure and leaf textures, lit softly against a dark gray studio background. This serves as a detailed inspector view within a professional 3D software's dark mode interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtl0MvWeTURd2R_R3zwCwNZS4L96gJphqcnQhfWciys5VCByReyELaKKHlzETRCfakpDXu0lqN4ZLf0zXeKWbpb9JiSSkir5kfYiA4X849mV2gbRdcvZcJwK9HFFJbMiqhrE5kRcpXQA9m7X5a3u35kd_p125288WpMpA5lWZuPdvd1r2bkAvzsot1QKrUnaSLPHKREOmQbSK24q-XuPadkEEtYpb2pP5dsSUEZWiBPGaK58MeDoMmoDJ_E8OpvFsutUYPf8jXYhI"/>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface leading-tight">Maple Tree - Autumn 01</h3>
+<div class="text-on-surface-variant font-label-md text-label-md mt-1">Nature &gt; Trees &gt; Deciduous</div>
+</div>
+<!-- Tab Navigation -->
+<div class="flex border-b border-outline-variant px-md">
+<button class="flex-1 py-sm text-primary border-b-2 border-primary font-label-md text-label-md">Info</button>
+<button class="flex-1 py-sm text-on-surface-variant hover:text-on-surface transition-colors font-label-md text-label-md">Materials</button>
+<button class="flex-1 py-sm text-on-surface-variant hover:text-on-surface transition-colors font-label-md text-label-md">Tags</button>
+</div>
+<!-- Properties Panel -->
+<div class="p-md flex flex-col gap-lg">
+<!-- Action Button -->
+<a class="w-full bg-primary-container hover:bg-[#0095CC] text-white font-label-md text-label-md py-sm rounded-DEFAULT flex items-center justify-center gap-sm transition-colors shadow-[0_4px_12px_rgba(0,174,239,0.2)]" href="{{DATA:SCREEN:SCREEN_13}}">
+<span class="material-symbols-outlined text-[18px]" data-icon="add_circle">add_circle</span>
+                    Place in Scene
+                </a>
+<!-- Data List -->
+<div class="flex flex-col gap-sm">
+<div class="flex justify-between items-center border-b border-[#2A2A2A] pb-xs">
+<span class="text-on-surface-variant font-label-md text-label-md">Type</span>
+<span class="text-on-surface font-mono-sm text-mono-sm">3D Mesh</span>
+</div>
+<div class="flex justify-between items-center border-b border-[#2A2A2A] pb-xs">
+<span class="text-on-surface-variant font-label-md text-label-md">Polygons</span>
+<span class="text-on-surface font-mono-sm text-mono-sm">1.2M (High)</span>
+</div>
+<div class="flex justify-between items-center border-b border-[#2A2A2A] pb-xs">
+<span class="text-on-surface-variant font-label-md text-label-md">File Size</span>
+<span class="text-on-surface font-mono-sm text-mono-sm">45 MB</span>
+</div>
+<div class="flex justify-between items-center border-b border-[#2A2A2A] pb-xs">
+<span class="text-on-surface-variant font-label-md text-label-md">LODs</span>
+<span class="text-on-surface font-mono-sm text-mono-sm">4 Levels</span>
+</div>
+<div class="flex justify-between items-center border-b border-[#2A2A2A] pb-xs">
+<span class="text-on-surface-variant font-label-md text-label-md">Author</span>
+<span class="text-primary font-mono-sm text-mono-sm cursor-pointer hover:underline">OpenRender Originals</span>
+</div>
+</div>
+<!-- Variations Section -->
+<div>
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-sm">Seasonal Variations</h4>
+<div class="flex gap-sm">
+<button class="w-[48px] h-[48px] bg-[#1E1E1E] border-2 border-primary rounded-DEFAULT overflow-hidden p-0.5">
+<div class="w-full h-full bg-[#cc5500] rounded-sm"></div>
+</button>
+<button class="w-[48px] h-[48px] bg-[#1E1E1E] border border-outline-variant hover:border-[#555] rounded-DEFAULT overflow-hidden p-0.5 transition-colors">
+<div class="w-full h-full bg-[#2d5a27] rounded-sm"></div>
+</button>
+<button class="w-[48px] h-[48px] bg-[#1E1E1E] border border-outline-variant hover:border-[#555] rounded-DEFAULT overflow-hidden p-0.5 transition-colors">
+<div class="w-full h-full bg-[#dbe2e9] rounded-sm"></div>
+</button>
+</div>
+</div>
+<!-- Description -->
+<div>
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-xs">Notes</h4>
+<p class="text-on-surface font-body-md text-body-md text-[13px] leading-relaxed bg-[#1A1A1A] p-sm rounded-DEFAULT border border-[#2A2A2A]">
+                        Highly detailed scan-based model suitable for foreground placement. Leaves use double-sided materials with subsurface scattering for realistic backlighting.
+                    </p>
+</div>
+</div>
+</aside>
+</div>
+</body></html>
