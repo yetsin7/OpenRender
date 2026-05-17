@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationIcon />
+    <StartupObject>OpenRender.Program</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.3" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Silk.NET.Vulkan" Version="2.21.0" />
+    <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.21.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenRender.Engine\OpenRender.Engine.csproj" />
+    <ProjectReference Include="..\OpenRender.Rendering\OpenRender.Rendering.csproj" />
+    <ProjectReference Include="..\OpenRender.Scene\OpenRender.Scene.csproj" />
+    <ProjectReference Include="..\OpenRender.Editor\OpenRender.Editor.csproj" />
+    <ProjectReference Include="..\OpenRender.Assets\OpenRender.Assets.csproj" />
+    <ProjectReference Include="..\OpenRender.ProjectSystem\OpenRender.ProjectSystem.csproj" />
+    <ProjectReference Include="..\OpenRender.Tools\OpenRender.Tools.csproj" />
+    <ProjectReference Include="..\OpenRender.Materials\OpenRender.Materials.csproj" />
+    <ProjectReference Include="..\OpenRender.Vegetation\OpenRender.Vegetation.csproj" />
+    <ProjectReference Include="..\OpenRender.Physics\OpenRender.Physics.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

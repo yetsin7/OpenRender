@@ -1,0 +1,217 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="OpenRender.App"
+             RequestedThemeVariant="Dark">
+
+    <!-- ========================================================= -->
+    <!--  OPEN RENDER STUDIO - LUMION STYLE UI THEME              -->
+    <!-- ========================================================= -->
+
+    <Application.Resources>
+
+        <!-- ===================================================== -->
+        <!-- MAIN WINDOW BACKGROUND                                -->
+        <!-- ===================================================== -->
+
+        <SolidColorBrush x:Key="WindowBgBrush"
+                          Color="#0A0E17"/>
+
+        <!-- ===================================================== -->
+        <!-- HEADER / TOPBAR                                       -->
+        <!-- ===================================================== -->
+
+        <LinearGradientBrush x:Key="HeaderBrush"
+                               StartPoint="0,0"
+                               EndPoint="1,1">
+            <GradientStop Color="#0D1524"
+                           Offset="0"/>
+            <GradientStop Color="#132033"
+                           Offset="0.5"/>
+            <GradientStop Color="#18283F"
+                           Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- ===================================================== -->
+        <!-- SIDEBARS / PANELS                                     -->
+        <!-- ===================================================== -->
+
+        <SolidColorBrush x:Key="PanelBgBrush"
+                          Color="#111827"/>
+
+        <SolidColorBrush x:Key="PanelAltBrush"
+                          Color="#172033"/>
+
+        <SolidColorBrush x:Key="SurfaceBrush"
+                          Color="#1B2940"/>
+
+        <SolidColorBrush x:Key="SurfaceMutedBrush"
+                          Color="#22324D"/>
+
+        <SolidColorBrush x:Key="OverlayBrush"
+                          Color="#CC0B1220"/>
+
+        <!-- ===================================================== -->
+        <!-- BORDERS                                               -->
+        <!-- ===================================================== -->
+
+        <SolidColorBrush x:Key="BorderBrushApp"
+                          Color="#2F415F"/>
+
+        <!-- ===================================================== -->
+        <!-- ACCENTS                                               -->
+        <!-- ===================================================== -->
+
+        <SolidColorBrush x:Key="AccentBrush"
+                          Color="#39C6D6"/>
+
+        <SolidColorBrush x:Key="AccentBrushStrong"
+                          Color="#00E0C6"/>
+
+        <SolidColorBrush x:Key="AccentWarmBrush"
+                          Color="#FFB648"/>
+
+        <SolidColorBrush x:Key="AccentDangerBrush"
+                          Color="#FF5D5D"/>
+
+        <SolidColorBrush x:Key="SuccessBrush"
+                          Color="#30D98A"/>
+
+        <!-- ===================================================== -->
+        <!-- TEXT COLORS                                           -->
+        <!-- ===================================================== -->
+
+        <SolidColorBrush x:Key="TextPrimaryBrush"
+                          Color="#F4F7FB"/>
+
+        <SolidColorBrush x:Key="TextSecondaryBrush"
+                          Color="#B0BED6"/>
+
+        <SolidColorBrush x:Key="TextMutedBrush"
+                          Color="#73829E"/>
+
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+
+        <!-- ===================================================== -->
+        <!-- BUTTON STYLES                                         -->
+        <!-- ===================================================== -->
+
+        <Style Selector="Button">
+            <Setter Property="Background"
+                    Value="{StaticResource SurfaceBrush}"/>
+
+            <Setter Property="Foreground"
+                    Value="{StaticResource TextPrimaryBrush}"/>
+
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource BorderBrushApp}"/>
+
+            <Setter Property="BorderThickness"
+                    Value="1"/>
+
+            <Setter Property="CornerRadius"
+                    Value="10"/>
+
+            <Setter Property="Padding"
+                    Value="10,6"/>
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold"/>
+        </Style>
+
+        <Style Selector="Button:pointerover">
+            <Setter Property="Background"
+                    Value="{StaticResource SurfaceMutedBrush}"/>
+        </Style>
+
+        <Style Selector="Button:pressed">
+            <Setter Property="Background"
+                    Value="{StaticResource AccentBrushStrong}"/>
+        </Style>
+
+        <!-- ===================================================== -->
+        <!-- TEXTBLOCK                                             -->
+        <!-- ===================================================== -->
+
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground"
+                    Value="{StaticResource TextPrimaryBrush}"/>
+        </Style>
+
+        <!-- ===================================================== -->
+        <!-- LISTBOX                                               -->
+        <!-- ===================================================== -->
+
+        <Style Selector="ListBox">
+            <Setter Property="Background"
+                    Value="Transparent"/>
+
+            <Setter Property="BorderBrush"
+                    Value="Transparent"/>
+        </Style>
+
+        <Style Selector="ListBoxItem">
+            <Setter Property="Background"
+                    Value="Transparent"/>
+
+            <Setter Property="CornerRadius"
+                    Value="8"/>
+
+            <Setter Property="Padding"
+                    Value="8"/>
+
+            <Setter Property="Margin"
+                    Value="2"/>
+        </Style>
+
+        <Style Selector="ListBoxItem:selected">
+            <Setter Property="Background"
+                    Value="#22324D"/>
+
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource AccentBrush}"/>
+
+            <Setter Property="BorderThickness"
+                    Value="1"/>
+        </Style>
+
+        <!-- ===================================================== -->
+        <!-- SLIDER                                                -->
+        <!-- ===================================================== -->
+
+        <Style Selector="Slider">
+            <Setter Property="Foreground"
+                    Value="{StaticResource AccentBrush}"/>
+        </Style>
+
+        <!-- ===================================================== -->
+        <!-- SCROLLVIEWER                                          -->
+        <!-- ===================================================== -->
+
+        <Style Selector="ScrollViewer">
+            <Setter Property="Background"
+                    Value="Transparent"/>
+        </Style>
+
+        <!-- ===================================================== -->
+        <!-- TOOLTIP                                               -->
+        <!-- ===================================================== -->
+
+        <Style Selector="ToolTip">
+            <Setter Property="Background"
+                    Value="#1A2436"/>
+
+            <Setter Property="Foreground"
+                    Value="White"/>
+
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource AccentBrush}"/>
+
+            <Setter Property="BorderThickness"
+                    Value="1"/>
+        </Style>
+    </Application.Styles>
+
+</Application>

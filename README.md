@@ -155,24 +155,22 @@ OpenRender/
 
 ---
 
-## 🏛️ Arquitectura
+## 🏛️ Arquitectura Moderna (Stride Engine)
 
 ### Módulos Principales
 
 ```
 ┌─────────────────────────────────────────┐
 │           OpenRender (UI)               │
-│   Avalonia UI · MVVM · Light Theme       │
+│   Avalonia UI · MVVM · Stride Viewport  │
 ├─────────────────┬───────────────────────┤
 │  OpenRender     │  OpenRender           │
-│  .Core          │  .Rendering           │
+│  .Scene         │  .Engine              │
 │                 │                       │
-│  Scene Graph    │  OpenGL via Silk.NET   │
-│  Camera         │  PBR Shaders          │
-│  Materials      │  Mesh Buffers         │
-│  Lights         │  OBJ Import           │
-│  Import API     │  Primitives           │
-│  Render Config  │  Demo Scene           │
+│  Scene Bridge   │  Stride Engine Core   │
+│  Entity Sync    │  AAA Navigation       │
+│  PBR Materials  │  PBR & HDR Render     │
+│  Model Mapping  │  Post-Processing      │
 └─────────────────┴───────────────────────┘
 ```
 
@@ -181,12 +179,11 @@ OpenRender/
 | Componente | Tecnología | Propósito |
 |---|---|---|
 | **Lenguaje** | C# | Lenguaje principal |
-| **Framework** | .NET 10 | Runtime multiplataforma |
-| **UI** | Avalonia UI 11.2 | Interfaz gráfica |
-| **Gráficos** | Silk.NET (OpenGL) | Renderizado 3D |
-| **Tipografía** | Inter | Fuente moderna |
-| **MVVM** | CommunityToolkit.Mvvm | Patrón de arquitectura |
-| **Imágenes** | SixLabors.ImageSharp | Procesamiento de texturas |
+| **Framework** | .NET 8-windows | Runtime de alto rendimiento |
+| **Motor 3D** | Stride Engine 4.2 | Core de renderizado y física |
+| **UI** | Avalonia UI 11.2 | Interfaz gráfica profesional |
+| **Navegación** | Lumion-style Script | Experiencia cinematográfica |
+
 
 ---
 
