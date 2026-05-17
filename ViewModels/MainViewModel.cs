@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Numerics;
 using Avalonia;
@@ -14,6 +15,7 @@ using OpenRender.Core.Import;
 using OpenRender.Core.Rendering;
 using OpenRender.Core.Scene;
 using OpenRender.Rendering;
+using OpenRender.Services;
 
 namespace OpenRender.ViewModels;
 
@@ -44,7 +46,12 @@ public partial class MainViewModel : ObservableObject
 {
     private static MainViewModel? _instance;
     private readonly RenderSettings _renderSettings;
+    private readonly LocalTextureCatalog _localTextureCatalog;
+    private readonly StudioLibraryStore _studioLibraryStore;
     private readonly List<SceneNodeViewModel> _allSceneNodes = new();
+    private readonly List<PbrMaterial> _trackedSceneMaterials = new();
+    private CancellationTokenSource? _materialStateSaveCts;
+    private bool _isRestoringStoredMaterials;
 
     public static void ReportGlError(string message)
     {
@@ -76,6 +83,8 @@ public partial class MainViewModel : ObservableObject
     public MainViewModel()
     {
         _instance = this;
+        _localTextureCatalog = new LocalTextureCatalog();
+        _studioLibraryStore = new StudioLibraryStore();
         _renderSettings = new RenderSettings
         {
             Width = 1920,
@@ -87,6 +96,7 @@ public partial class MainViewModel : ObservableObject
 
         RecentFiles.CollectionChanged += OnRecentFilesChanged;
         LoadMaterialLibrary();
+        RefreshImportedHistory();
 
         Scene = CreateDefaultScene();
         ApplyScene(Scene, "Estudio demo");
@@ -110,6 +120,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _workspaceTitle = "Architectural Study";
     [ObservableProperty] private string _workspaceSubtitle = "Viewport en tiempo real, materiales y salida de imagen.";
     [ObservableProperty] private string _sceneFilterText = "";
+    [ObservableProperty] private string? _currentSourceFilePath;
 
     [ObservableProperty] private bool _hasModel;
     [ObservableProperty] private bool _isLoading;
@@ -120,6 +131,10 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private float _navigationSpeed;
     [ObservableProperty] private float _sunIntensity = 1.8f;
     [ObservableProperty] private float _ambientIntensity = 0.2f;
+    [ObservableProperty] private float _photoExposure = 1.05f;
+    [ObservableProperty] private float _photoGamma = 2.2f;
+    [ObservableProperty] private float _photoContrast = 1.02f;
+    [ObservableProperty] private float _photoWhiteBalance;
     [ObservableProperty] private string _sunStatusText = "Sol activo";
 
     [ObservableProperty] private int _objectCount;
@@ -132,6 +147,7 @@ public partial class MainViewModel : ObservableObject
     public ObservableCollection<SceneNodeViewModel> SceneNodes { get; } = new();
     public ObservableCollection<PbrMaterial> SceneMaterials { get; } = new();
     public ObservableCollection<MaterialPresetDefinition> MaterialLibraryPresets { get; } = new();
+    public ObservableCollection<ImportedModelHistoryItemViewModel> ImportedHistory { get; } = new();
     public ObservableCollection<string> RecentFiles { get; } = new();
 
     public string RenderResolution => $"{_renderSettings.Width} x {_renderSettings.Height}";
@@ -142,6 +158,8 @@ public partial class MainViewModel : ObservableObject
     public bool HasSelectedMaterial => SelectedMaterial != null;
     public bool HasSceneSelection => SelectedSceneNode != null;
     public bool HasRecentFiles => RecentFiles.Count > 0;
+    public bool HasImportedHistory => ImportedHistory.Count > 0;
+    public bool HasLoadedSourceFile => !string.IsNullOrWhiteSpace(CurrentSourceFilePath);
     public bool ShowEmptyState => !HasModel;
     public string WorkspaceModeText => HasModel ? "Proyecto cargado" : "Estudio base";
     public string CurrentSceneLabel => Scene.Name;
@@ -151,8 +169,10 @@ public partial class MainViewModel : ObservableObject
     public string CameraFocusText => $"Objetivo {Scene.Camera.Target.X:F1}, {Scene.Camera.Target.Y:F1}, {Scene.Camera.Target.Z:F1}";
     public string SupportedFormatsText => "OBJ listo hoy. FBX, glTF/GLB e IFC quedan como siguiente fase del pipeline.";
     public string SelectedMaterialCategory => SelectedMaterial?.Category ?? "Sin categoría";
+    public string SelectedMaterialSourceText => SelectedMaterial?.SourceName ?? SelectedMaterial?.Name ?? "Sin origen importado";
     public string SelectedMaterialUsageText => SelectedMaterial != null ? $"{SelectedMaterial.UsageCount} superficies" : "Sin material";
     public string MaterialLibraryInfoText => $"{MaterialLibraryPresets.Count} presets arquitectónicos";
+    public string ImportedLibraryInfoText => $"{ImportedHistory.Count} modelos guardados en la biblioteca local";
 
     public float MaterialAlbedoR
     {
@@ -244,11 +264,33 @@ public partial class MainViewModel : ObservableObject
         if (!File.Exists(filePath))
         {
             RecentFiles.Remove(filePath);
+            _studioLibraryStore.RemoveEntry(filePath);
+            RefreshImportedHistory();
             StatusText = "Ese archivo reciente ya no existe.";
             return;
         }
 
         await LoadFileAsync(filePath);
+    }
+
+    [RelayCommand]
+    private async Task ReloadCurrentModelAsync()
+    {
+        if (string.IsNullOrWhiteSpace(CurrentSourceFilePath))
+        {
+            StatusText = "No hay un archivo importado para reimportar.";
+            return;
+        }
+
+        if (!File.Exists(CurrentSourceFilePath))
+        {
+            StatusText = "El archivo actual ya no existe en disco.";
+            RefreshImportedHistory();
+            return;
+        }
+
+        await LoadFileAsync(CurrentSourceFilePath);
+        StatusText = $"Reimportación lista: {Path.GetFileName(CurrentSourceFilePath)}.";
     }
 
     public async Task LoadStartupFileAsync(string filePath, bool runSmokeTest = false, string? capturePath = null)
@@ -268,10 +310,11 @@ public partial class MainViewModel : ObservableObject
     private async Task LoadFileAsync(string filePath)
     {
         bool waitingForViewport = false;
+        string normalizedPath = Path.GetFullPath(filePath);
 
         try
         {
-            StatusText = $"Importando {Path.GetFileName(filePath)}...";
+            StatusText = $"Importando {Path.GetFileName(normalizedPath)}...";
             IsLoading = true;
             ProgressValue = 0;
             await Task.Delay(50);
@@ -292,7 +335,7 @@ public partial class MainViewModel : ObservableObject
             });
 
             var sw = Stopwatch.StartNew();
-            var importResult = await manager.ImportAsync(filePath, options, progress);
+            var importResult = await manager.ImportAsync(normalizedPath, options, progress);
             sw.Stop();
 
             if (!importResult.Success || importResult.Scene == null)
@@ -302,11 +345,15 @@ public partial class MainViewModel : ObservableObject
                 return;
             }
 
-            ApplyScene(importResult.Scene, Path.GetFileName(filePath), sw.Elapsed);
-            AddRecentFile(filePath);
+            CurrentSourceFilePath = normalizedPath;
+            ApplyScene(importResult.Scene, Path.GetFileName(normalizedPath), sw.Elapsed);
+            RestoreStoredMaterialOverrides();
+            _studioLibraryStore.UpsertImportRecord(normalizedPath, Scene, sw.Elapsed);
+            PersistCurrentSceneMaterialState();
+            UpdateLoadedModelInfo(Path.GetFileName(normalizedPath), sw.Elapsed);
 
             ProgressValue = 100;
-            StatusText = $"Modelo importado. Preparando viewport para {Path.GetFileName(filePath)}...";
+            StatusText = $"Modelo importado. Preparando viewport para {Path.GetFileName(normalizedPath)}...";
             RenderInfoText = $"{RenderResolution} | {OutputFormatText} | viewport listo";
             waitingForViewport = true;
         }
@@ -324,6 +371,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void NewScene()
     {
+        CurrentSourceFilePath = null;
         ApplyScene(CreateDefaultScene(), "Estudio demo");
         StatusText = "Estudio demo recargado.";
     }
@@ -504,8 +552,10 @@ public partial class MainViewModel : ObservableObject
         }
 
         MaterialCatalog.ApplyPreset(SelectedMaterial, preset);
+        _localTextureCatalog.ApplyPresetTextures(SelectedMaterial);
         UpdateMaterialBindings();
         LoadSceneNodes();
+        SchedulePersistCurrentSceneMaterialState();
         StatusText = $"Preset global aplicado: {preset.Name}.";
     }
 
@@ -528,6 +578,7 @@ public partial class MainViewModel : ObservableObject
         LoadSceneMaterials();
         LoadSceneNodes();
         UpdateAllProperties();
+        PersistCurrentSceneMaterialState();
         StatusText = "Materiales reordenados y sugeridos por nombre.";
     }
 
@@ -542,6 +593,7 @@ public partial class MainViewModel : ObservableObject
 
         AutoStylePrimarySurfacesForPhoto();
         ApplyEnvironmentPresetCore("Day", suppressStatus: true);
+        ApplyPhotoLookPreset("ExteriorDay");
 
         if (TryGetSceneBounds(out var min, out var max))
             Scene.Camera.FramePhotoShot(min, max);
@@ -608,6 +660,7 @@ public partial class MainViewModel : ObservableObject
                 sun.Intensity = 1.8f;
                 sun.Color = new Vector3(1.0f, 0.97f, 0.92f);
                 sun.Direction = Vector3.Normalize(new Vector3(-0.35f, -1f, -0.25f));
+                ApplyPhotoLookPreset("ExteriorDay");
                 break;
             case "overcast":
                 Scene.BackgroundColor = new Vector3(0.45f, 0.52f, 0.62f);
@@ -615,6 +668,7 @@ public partial class MainViewModel : ObservableObject
                 sun.Intensity = 0.9f;
                 sun.Color = new Vector3(0.92f, 0.95f, 1.0f);
                 sun.Direction = Vector3.Normalize(new Vector3(-0.20f, -1f, -0.10f));
+                ApplyPhotoLookPreset("Overcast");
                 break;
             case "sunset":
                 Scene.BackgroundColor = new Vector3(0.76f, 0.46f, 0.30f);
@@ -622,6 +676,7 @@ public partial class MainViewModel : ObservableObject
                 sun.Intensity = 1.4f;
                 sun.Color = new Vector3(1.0f, 0.78f, 0.58f);
                 sun.Direction = Vector3.Normalize(new Vector3(0.55f, -0.55f, -0.20f));
+                ApplyPhotoLookPreset("Sunset");
                 break;
             default:
                 Scene.BackgroundColor = new Vector3(0.09f, 0.12f, 0.18f);
@@ -629,12 +684,51 @@ public partial class MainViewModel : ObservableObject
                 sun.Intensity = 1.1f;
                 sun.Color = new Vector3(0.94f, 0.96f, 1.0f);
                 sun.Direction = Vector3.Normalize(new Vector3(-0.15f, -1f, 0.10f));
+                ApplyPhotoLookPreset("Studio");
                 break;
         }
 
         UpdateAllProperties();
         if (!suppressStatus)
             StatusText = $"Entorno aplicado: {presetName}.";
+    }
+
+    private void ApplyPhotoLookPreset(string presetName)
+    {
+        switch (presetName.ToLowerInvariant())
+        {
+            case "exteriorday":
+                Scene.Exposure = 1.10f;
+                Scene.Gamma = 2.15f;
+                Scene.Contrast = 1.08f;
+                Scene.WhiteBalance = 0.08f;
+                break;
+            case "overcast":
+                Scene.Exposure = 1.18f;
+                Scene.Gamma = 2.20f;
+                Scene.Contrast = 0.96f;
+                Scene.WhiteBalance = -0.04f;
+                break;
+            case "sunset":
+                Scene.Exposure = 1.04f;
+                Scene.Gamma = 2.10f;
+                Scene.Contrast = 1.12f;
+                Scene.WhiteBalance = 0.22f;
+                break;
+            default:
+                Scene.Exposure = 0.98f;
+                Scene.Gamma = 2.24f;
+                Scene.Contrast = 1.04f;
+                Scene.WhiteBalance = -0.02f;
+                break;
+        }
+
+        PhotoExposure = Scene.Exposure;
+        PhotoGamma = Scene.Gamma;
+        PhotoContrast = Scene.Contrast;
+        PhotoWhiteBalance = Scene.WhiteBalance;
+        _renderSettings.Exposure = Scene.Exposure;
+        _renderSettings.Gamma = Scene.Gamma;
     }
 
     [RelayCommand]
@@ -724,6 +818,28 @@ public partial class MainViewModel : ObservableObject
         Scene.AmbientIntensity = value;
     }
 
+    partial void OnPhotoExposureChanged(float value)
+    {
+        Scene.Exposure = value;
+        _renderSettings.Exposure = value;
+    }
+
+    partial void OnPhotoGammaChanged(float value)
+    {
+        Scene.Gamma = value;
+        _renderSettings.Gamma = value;
+    }
+
+    partial void OnPhotoContrastChanged(float value)
+    {
+        Scene.Contrast = value;
+    }
+
+    partial void OnPhotoWhiteBalanceChanged(float value)
+    {
+        Scene.WhiteBalance = value;
+    }
+
     partial void OnCameraFovChanged(float value)
     {
         Scene.Camera.FieldOfView = value;
@@ -739,6 +855,11 @@ public partial class MainViewModel : ObservableObject
     partial void OnNavigationSpeedChanged(float value)
     {
         Scene.Camera.MoveSpeed = value;
+    }
+
+    partial void OnCurrentSourceFilePathChanged(string? value)
+    {
+        OnPropertyChanged(nameof(HasLoadedSourceFile));
     }
 
     private void ApplyScene(Scene3D scene, string sourceLabel, TimeSpan? importDuration = null)
@@ -757,18 +878,18 @@ public partial class MainViewModel : ObservableObject
             : "Importa un modelo para poblar la escena.";
 
         PrepareSceneMaterials(Scene, autoApplyMatches: HasModel);
-        LoadSceneMaterials();
-        LoadSceneNodes();
-        UpdateAllProperties();
+        RefreshScenePresentation();
         UpdateLoadedModelInfo(sourceLabel, importDuration);
     }
 
     private void LoadSceneMaterials()
     {
+        DetachSceneMaterialHandlers();
         SceneMaterials.Clear();
         foreach (var material in Scene.Materials)
             SceneMaterials.Add(material);
 
+        AttachSceneMaterialHandlers();
         OnPropertyChanged(nameof(MaterialLibraryInfoText));
     }
 
@@ -796,15 +917,26 @@ public partial class MainViewModel : ObservableObject
         for (int index = 0; index < scene.Materials.Count; index++)
         {
             var material = scene.Materials[index];
+            material.SourceName ??= material.Name;
             material.UsageCount = usageByMaterial.TryGetValue(index, out int usageCount) ? usageCount : 0;
 
-            if (autoApplyMatches && MaterialCatalog.TryMatchPreset(material.Name, out var matchedPreset))
+            string descriptor = $"{material.SourceName} {material.Name}";
+
+            if (autoApplyMatches && MaterialCatalog.TryMatchPreset(descriptor, out var matchedPreset))
             {
                 MaterialCatalog.ApplyPreset(material, matchedPreset);
+                _localTextureCatalog.ApplyPresetTextures(material);
+            }
+            else if (autoApplyMatches &&
+                     material.Opacity < 0.99f &&
+                     MaterialCatalog.TryGetPreset("glass-clear", out var transparentPreset))
+            {
+                MaterialCatalog.ApplyPreset(material, transparentPreset);
+                _localTextureCatalog.ApplyPresetTextures(material);
             }
             else
             {
-                material.Category = MaterialCatalog.GuessCategory(material.Name);
+                material.Category = MaterialCatalog.GuessCategory(descriptor);
             }
         }
 
@@ -879,11 +1011,20 @@ public partial class MainViewModel : ObservableObject
             return "Grupo o transform";
 
         string materialName = "Sin material";
+        string? sourceMaterialName = null;
         if (node.MaterialIndex is int materialIndex &&
             materialIndex >= 0 &&
             materialIndex < Scene.Materials.Count)
         {
-            materialName = Scene.Materials[materialIndex].Name;
+            var material = Scene.Materials[materialIndex];
+            materialName = material.Name;
+            sourceMaterialName = material.SourceName;
+        }
+
+        if (!string.IsNullOrWhiteSpace(sourceMaterialName) &&
+            !string.Equals(sourceMaterialName, materialName, StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{node.Mesh.TriangleCount:N0} tris · {materialName} <- {sourceMaterialName}";
         }
 
         return $"{node.Mesh.TriangleCount:N0} tris · {materialName}";
@@ -905,9 +1046,8 @@ public partial class MainViewModel : ObservableObject
         }
 
         PrepareSceneMaterials(Scene, autoApplyMatches: false);
-        LoadSceneMaterials();
-        LoadSceneNodes();
-        UpdateAllProperties();
+        RefreshScenePresentation();
+        PersistCurrentSceneMaterialState();
         StatusText = $"Material aplicado a {node.Name}: {preset.Name}.";
     }
 
@@ -940,9 +1080,8 @@ public partial class MainViewModel : ObservableObject
             return;
 
         PrepareSceneMaterials(Scene, autoApplyMatches: false);
-        LoadSceneMaterials();
-        LoadSceneNodes();
-        UpdateAllProperties();
+        RefreshScenePresentation();
+        PersistCurrentSceneMaterialState();
     }
 
     private bool ApplyPresetToNodeCore(SceneNode node, MaterialPresetDefinition preset, bool selectMaterial)
@@ -956,15 +1095,18 @@ public partial class MainViewModel : ObservableObject
         if (existingMaterial != null &&
             string.Equals(existingMaterial.PresetKey, preset.Key, StringComparison.OrdinalIgnoreCase))
         {
+            bool backfilledTextures = _localTextureCatalog.BackfillPresetTexturesIfMissing(existingMaterial);
             if (selectMaterial)
                 SelectedMaterial = existingMaterial;
 
-            return false;
+            return backfilledTextures;
         }
 
         if (existingMaterial != null && existingMaterial.UsageCount <= 1)
         {
+            existingMaterial.SourceName ??= existingMaterial.Name;
             MaterialCatalog.ApplyPreset(existingMaterial, preset);
+            _localTextureCatalog.ApplyPresetTextures(existingMaterial);
             existingMaterial.Name = $"{preset.Name} · {TrimNodeName(node.Name)}";
 
             if (selectMaterial)
@@ -976,6 +1118,8 @@ public partial class MainViewModel : ObservableObject
         var localizedMaterial = preset.Material.Clone($"{preset.Name} · {TrimNodeName(node.Name)}");
         localizedMaterial.Category = preset.Category;
         localizedMaterial.PresetKey = preset.Key;
+        localizedMaterial.SourceName = existingMaterial?.SourceName ?? existingMaterial?.Name ?? node.Name;
+        _localTextureCatalog.ApplyPresetTextures(localizedMaterial);
         Scene.Materials.Add(localizedMaterial);
         node.MaterialIndex = Scene.Materials.Count - 1;
 
@@ -1031,7 +1175,18 @@ public partial class MainViewModel : ObservableObject
         }
 
         string timeInfo = importDuration.HasValue ? $" · {importDuration.Value.TotalMilliseconds:F0} ms" : "";
-        LoadedModelInfo = $"{sourceLabel} · {TriangleCount:N0} tris · {MaterialCount} materiales{timeInfo}";
+        string materialStateInfo = "";
+
+        var storedRecord = string.IsNullOrWhiteSpace(CurrentSourceFilePath)
+            ? null
+            : _studioLibraryStore.Find(CurrentSourceFilePath);
+
+        if (storedRecord?.MaterialOverrides.Count > 0)
+        {
+            materialStateInfo = $" · {storedRecord.MaterialOverrides.Count} superficies guardadas";
+        }
+
+        LoadedModelInfo = $"{sourceLabel} · {TriangleCount:N0} tris · {MaterialCount} materiales{timeInfo}{materialStateInfo}";
     }
 
     private void UpdateCameraProps()
@@ -1058,6 +1213,10 @@ public partial class MainViewModel : ObservableObject
         }
 
         AmbientIntensity = Scene.AmbientIntensity;
+        PhotoExposure = Scene.Exposure;
+        PhotoGamma = Scene.Gamma;
+        PhotoContrast = Scene.Contrast;
+        PhotoWhiteBalance = Scene.WhiteBalance;
         SceneInfoText = $"{ObjectCount} objetos · {TriangleCount:N0} tris · {MaterialCount} materiales";
         RenderInfoText = $"{RenderResolution} | {OutputFormatText} | {_renderSettings.Quality}";
 
@@ -1103,15 +1262,292 @@ public partial class MainViewModel : ObservableObject
         return sun;
     }
 
-    private void AddRecentFile(string filePath)
+    private void RefreshScenePresentation()
     {
-        if (RecentFiles.Contains(filePath))
-            RecentFiles.Remove(filePath);
+        LoadSceneMaterials();
+        LoadSceneNodes();
+        UpdateAllProperties();
+    }
 
-        RecentFiles.Insert(0, filePath);
+    private void RestoreStoredMaterialOverrides()
+    {
+        if (string.IsNullOrWhiteSpace(CurrentSourceFilePath))
+            return;
 
-        while (RecentFiles.Count > 8)
-            RecentFiles.RemoveAt(RecentFiles.Count - 1);
+        var record = _studioLibraryStore.Find(CurrentSourceFilePath);
+        if (record?.MaterialOverrides == null || record.MaterialOverrides.Count == 0)
+            return;
+
+        var surfaceOverrides = record.MaterialOverrides
+            .Where(item => !string.IsNullOrWhiteSpace(item.SurfaceKey))
+            .GroupBy(item => item.SurfaceKey, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+        var sourceMaterialOverrides = record.MaterialOverrides
+            .Where(item => !string.IsNullOrWhiteSpace(item.SourceMaterialName))
+            .GroupBy(item => item.SourceMaterialName, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+        int restoredCount = 0;
+        var createdMaterials = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        _isRestoringStoredMaterials = true;
+        try
+        {
+            foreach (var node in Scene.GetAllNodes().Where(node => node.Mesh != null))
+            {
+                if (node.MaterialIndex is not int materialIndex ||
+                    materialIndex < 0 ||
+                    materialIndex >= Scene.Materials.Count)
+                {
+                    continue;
+                }
+
+                var currentMaterial = Scene.Materials[materialIndex];
+                string sourceMaterialName = currentMaterial.SourceName ?? currentMaterial.Name;
+
+                if (!surfaceOverrides.TryGetValue(node.Name, out var overrideRecord) &&
+                    !sourceMaterialOverrides.TryGetValue(sourceMaterialName, out overrideRecord))
+                {
+                    continue;
+                }
+
+                if (ApplyStoredOverrideToNode(node, overrideRecord, createdMaterials))
+                    restoredCount++;
+            }
+        }
+        finally
+        {
+            _isRestoringStoredMaterials = false;
+        }
+
+        if (restoredCount <= 0)
+            return;
+
+        PrepareSceneMaterials(Scene, autoApplyMatches: false);
+        RefreshScenePresentation();
+        StatusText = $"Modelo importado. Restauré {restoredCount} materiales desde la biblioteca local.";
+    }
+
+    private bool ApplyStoredOverrideToNode(
+        SceneNode node,
+        StoredMaterialOverride overrideRecord,
+        Dictionary<string, int> createdMaterials)
+    {
+        if (node.MaterialIndex is not int materialIndex ||
+            materialIndex < 0 ||
+            materialIndex >= Scene.Materials.Count)
+        {
+            return false;
+        }
+
+        string overrideKey = BuildOverrideCacheKey(overrideRecord);
+        if (createdMaterials.TryGetValue(overrideKey, out int cachedMaterialIndex))
+        {
+            if (node.MaterialIndex == cachedMaterialIndex)
+                return false;
+
+            node.MaterialIndex = cachedMaterialIndex;
+            return true;
+        }
+
+        var existingMaterial = Scene.Materials[materialIndex];
+        if (MaterialMatchesOverride(existingMaterial, overrideRecord))
+        {
+            createdMaterials[overrideKey] = materialIndex;
+            return false;
+        }
+
+        if (existingMaterial.UsageCount <= 1)
+        {
+            ApplyStoredOverrideValues(existingMaterial, overrideRecord);
+            _localTextureCatalog.BackfillPresetTexturesIfMissing(existingMaterial);
+            createdMaterials[overrideKey] = materialIndex;
+            return true;
+        }
+
+        var localizedMaterial = existingMaterial.Clone(overrideRecord.DisplayMaterialName);
+        ApplyStoredOverrideValues(localizedMaterial, overrideRecord);
+        _localTextureCatalog.BackfillPresetTexturesIfMissing(localizedMaterial);
+        Scene.Materials.Add(localizedMaterial);
+        node.MaterialIndex = Scene.Materials.Count - 1;
+        createdMaterials[overrideKey] = node.MaterialIndex.Value;
+        return true;
+    }
+
+    private static void ApplyStoredOverrideValues(PbrMaterial material, StoredMaterialOverride overrideRecord)
+    {
+        material.Name = string.IsNullOrWhiteSpace(overrideRecord.DisplayMaterialName)
+            ? material.Name
+            : overrideRecord.DisplayMaterialName;
+        material.SourceName = string.IsNullOrWhiteSpace(overrideRecord.SourceMaterialName)
+            ? material.SourceName ?? material.Name
+            : overrideRecord.SourceMaterialName;
+        material.Category = overrideRecord.Category ?? material.Category;
+        material.PresetKey = overrideRecord.PresetKey;
+        material.Albedo = overrideRecord.Albedo.ToVector3();
+        material.Metallic = overrideRecord.Metallic;
+        material.Roughness = overrideRecord.Roughness;
+        material.AmbientOcclusion = overrideRecord.AmbientOcclusion;
+        material.Opacity = overrideRecord.Opacity;
+        material.Emissive = overrideRecord.Emissive.ToVector3();
+        material.NormalStrength = overrideRecord.NormalStrength;
+        material.UvScale = overrideRecord.UvScale;
+        material.AlbedoTexturePath = overrideRecord.AlbedoTexturePath;
+        material.NormalTexturePath = overrideRecord.NormalTexturePath;
+        material.RoughnessTexturePath = overrideRecord.RoughnessTexturePath;
+        material.AoTexturePath = overrideRecord.AoTexturePath;
+    }
+
+    private static bool MaterialMatchesOverride(PbrMaterial material, StoredMaterialOverride overrideRecord)
+    {
+        return string.Equals(material.Name, overrideRecord.DisplayMaterialName, StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(material.SourceName ?? material.Name, overrideRecord.SourceMaterialName, StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(material.PresetKey ?? "", overrideRecord.PresetKey ?? "", StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(material.Category ?? "", overrideRecord.Category ?? "", StringComparison.OrdinalIgnoreCase) &&
+               NearlyEqual(material.Metallic, overrideRecord.Metallic) &&
+               NearlyEqual(material.Roughness, overrideRecord.Roughness) &&
+               NearlyEqual(material.AmbientOcclusion, overrideRecord.AmbientOcclusion) &&
+               NearlyEqual(material.Opacity, overrideRecord.Opacity) &&
+               NearlyEqual(material.NormalStrength, overrideRecord.NormalStrength) &&
+               NearlyEqual(material.UvScale, overrideRecord.UvScale) &&
+               string.Equals(material.AlbedoTexturePath ?? "", overrideRecord.AlbedoTexturePath ?? "", StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(material.NormalTexturePath ?? "", overrideRecord.NormalTexturePath ?? "", StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(material.RoughnessTexturePath ?? "", overrideRecord.RoughnessTexturePath ?? "", StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(material.AoTexturePath ?? "", overrideRecord.AoTexturePath ?? "", StringComparison.OrdinalIgnoreCase) &&
+               NearlyEqual(material.Albedo, overrideRecord.Albedo.ToVector3()) &&
+               NearlyEqual(material.Emissive, overrideRecord.Emissive.ToVector3());
+    }
+
+    private void AttachSceneMaterialHandlers()
+    {
+        foreach (var material in SceneMaterials)
+        {
+            material.PropertyChanged += OnSceneMaterialChanged;
+            _trackedSceneMaterials.Add(material);
+        }
+    }
+
+    private void DetachSceneMaterialHandlers()
+    {
+        foreach (var material in _trackedSceneMaterials)
+            material.PropertyChanged -= OnSceneMaterialChanged;
+
+        _trackedSceneMaterials.Clear();
+    }
+
+    private void OnSceneMaterialChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (_isRestoringStoredMaterials || string.IsNullOrWhiteSpace(CurrentSourceFilePath) || !HasModel)
+            return;
+
+        if (string.Equals(e.PropertyName, nameof(PbrMaterial.UsageCount), StringComparison.Ordinal))
+            return;
+
+        SchedulePersistCurrentSceneMaterialState();
+    }
+
+    private async void SchedulePersistCurrentSceneMaterialState()
+    {
+        _materialStateSaveCts?.Cancel();
+        _materialStateSaveCts = new CancellationTokenSource();
+        var token = _materialStateSaveCts.Token;
+
+        try
+        {
+            await Task.Delay(180, token);
+            if (!token.IsCancellationRequested)
+                PersistCurrentSceneMaterialState();
+        }
+        catch (TaskCanceledException)
+        {
+        }
+    }
+
+    private void PersistCurrentSceneMaterialState()
+    {
+        if (_isRestoringStoredMaterials || string.IsNullOrWhiteSpace(CurrentSourceFilePath) || !HasModel)
+            return;
+
+        _studioLibraryStore.SaveSceneMaterialState(CurrentSourceFilePath, Scene);
+        RefreshImportedHistory();
+    }
+
+    private void RefreshImportedHistory()
+    {
+        var history = _studioLibraryStore.GetHistory();
+
+        ImportedHistory.Clear();
+        RecentFiles.Clear();
+
+        foreach (var item in history)
+        {
+            bool existsOnDisk = File.Exists(item.SourcePath);
+            ImportedHistory.Add(new ImportedModelHistoryItemViewModel
+            {
+                FilePath = item.SourcePath,
+                DisplayName = string.IsNullOrWhiteSpace(item.DisplayName)
+                    ? Path.GetFileNameWithoutExtension(item.SourcePath)
+                    : item.DisplayName,
+                Summary = BuildImportedHistorySummary(item),
+                Meta = BuildImportedHistoryMeta(item, existsOnDisk),
+                ExistsOnDisk = existsOnDisk
+            });
+
+            if (existsOnDisk && RecentFiles.Count < 8)
+                RecentFiles.Add(item.SourcePath);
+        }
+
+        OnPropertyChanged(nameof(HasImportedHistory));
+        OnPropertyChanged(nameof(ImportedLibraryInfoText));
+    }
+
+    private static string BuildImportedHistorySummary(ImportedModelRecord item)
+    {
+        return $"{item.ObjectCount} objs · {item.TriangleCount:N0} tris · {item.MaterialCount} mats · {FormatHistoryMoment(item.LastImportedUtc)}";
+    }
+
+    private static string BuildImportedHistoryMeta(ImportedModelRecord item, bool existsOnDisk)
+    {
+        string sizeText = item.FileSizeBytes > 0
+            ? $"{item.FileSizeBytes / (1024f * 1024f):F1} MB"
+            : "tamaño desconocido";
+
+        string diskState = existsOnDisk ? sizeText : "archivo no encontrado";
+        return $"{diskState} · {item.SourcePath}";
+    }
+
+    private static string FormatHistoryMoment(DateTime utcValue)
+    {
+        if (utcValue == default)
+            return "sin fecha";
+
+        return utcValue.ToLocalTime().ToString("dd MMM yyyy HH:mm");
+    }
+
+    private static string BuildOverrideCacheKey(StoredMaterialOverride overrideRecord)
+    {
+        return string.Join("|",
+            overrideRecord.SourceMaterialName,
+            overrideRecord.DisplayMaterialName,
+            overrideRecord.PresetKey ?? "",
+            overrideRecord.Category ?? "",
+            overrideRecord.Albedo.X.ToString("F4"),
+            overrideRecord.Albedo.Y.ToString("F4"),
+            overrideRecord.Albedo.Z.ToString("F4"),
+            overrideRecord.Metallic.ToString("F4"),
+            overrideRecord.Roughness.ToString("F4"),
+            overrideRecord.AmbientOcclusion.ToString("F4"),
+            overrideRecord.Opacity.ToString("F4"),
+            overrideRecord.Emissive.X.ToString("F4"),
+            overrideRecord.Emissive.Y.ToString("F4"),
+            overrideRecord.Emissive.Z.ToString("F4"),
+            overrideRecord.NormalStrength.ToString("F4"),
+            overrideRecord.UvScale.ToString("F4"),
+            overrideRecord.AlbedoTexturePath ?? "",
+            overrideRecord.NormalTexturePath ?? "",
+            overrideRecord.RoughnessTexturePath ?? "",
+            overrideRecord.AoTexturePath ?? "");
     }
 
     private void UpdateMaterialBindings()
@@ -1121,6 +1557,7 @@ public partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(MaterialAlbedoG));
         OnPropertyChanged(nameof(MaterialAlbedoB));
         OnPropertyChanged(nameof(SelectedMaterialCategory));
+        OnPropertyChanged(nameof(SelectedMaterialSourceText));
         OnPropertyChanged(nameof(SelectedMaterialUsageText));
         OnPropertyChanged(nameof(HasSelectedMeshNode));
     }
@@ -1128,6 +1565,18 @@ public partial class MainViewModel : ObservableObject
     private void OnRecentFilesChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         OnPropertyChanged(nameof(HasRecentFiles));
+    }
+
+    private static bool NearlyEqual(float left, float right)
+    {
+        return MathF.Abs(left - right) <= 0.0005f;
+    }
+
+    private static bool NearlyEqual(Vector3 left, Vector3 right)
+    {
+        return NearlyEqual(left.X, right.X) &&
+               NearlyEqual(left.Y, right.Y) &&
+               NearlyEqual(left.Z, right.Z);
     }
 
     private void RefreshVisibleSceneNodes(string? preferredNodeId = null, string? preferredLightName = null)

@@ -33,7 +33,9 @@ public class ObjImporter : IModelImporter
 
             var materials = new List<PbrMaterial>();
             var materialMap = new Dictionary<string, int>();
-            materials.Add(PbrMaterial.Default);
+            var defaultMaterial = PbrMaterial.Default;
+            defaultMaterial.SourceName = defaultMaterial.Name;
+            materials.Add(defaultMaterial);
             materialMap["default"] = 0;
 
             var builders = new Dictionary<string, MeshBuilder>();
@@ -86,17 +88,30 @@ public class ObjImporter : IModelImporter
                 switch (parts[0])
                 {
                     case "mtllib" when parts.Length >= 2:
-                        var mtlPath = Path.Combine(Path.GetDirectoryName(filePath) ?? "", parts[1]);
-                        if (File.Exists(mtlPath)) ParseMtlFile(mtlPath, materials, materialMap);
+                        var mtlFileName = string.Join(' ', parts.Skip(1));
+                        var mtlPath = Path.Combine(Path.GetDirectoryName(filePath) ?? "", mtlFileName);
+                        if (File.Exists(mtlPath))
+                        {
+                            ParseMtlFile(mtlPath, materials, materialMap);
+                            foreach (var builder in builders.Values)
+                            {
+                                if (materialMap.TryGetValue(builder.MaterialName, out int parsedMaterialIndex))
+                                    builder.MaterialIndex = parsedMaterialIndex;
+                            }
+                        }
                         break;
                     case "usemtl" when parts.Length >= 2:
-                        currentMaterialName = parts[1];
+                        currentMaterialName = string.Join(' ', parts.Skip(1));
                         currentBuilder = GetOrCreateBuilder(currentGroupName, currentMaterialName);
+                        if (materialMap.TryGetValue(currentMaterialName, out int materialIndex))
+                            currentBuilder.MaterialIndex = materialIndex;
                         break;
                     case "g" when parts.Length >= 2:
                     case "o" when parts.Length >= 2:
                         currentGroupName = string.Join(' ', parts.Skip(1));
                         currentBuilder = GetOrCreateBuilder(currentGroupName, currentMaterialName);
+                        if (materialMap.TryGetValue(currentMaterialName, out int groupMaterialIndex))
+                            currentBuilder.MaterialIndex = groupMaterialIndex;
                         break;
                     case "v" when parts.Length >= 4:
                         float vx = ParseFloat(parts[1]) * options.Scale;
@@ -398,17 +413,23 @@ public class ObjImporter : IModelImporter
         try
         {
             var lines = File.ReadAllLines(mtlPath);
+            string materialDirectory = Path.GetDirectoryName(mtlPath) ?? "";
             PbrMaterial? current = null;
             foreach (var raw in lines)
             {
                 var l = raw.Trim();
                 if (string.IsNullOrEmpty(l) || l.StartsWith('#')) continue;
                 var p = l.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (p[0] == "newmtl" && p.Length >= 2)
+                if (l.StartsWith("newmtl ", StringComparison.OrdinalIgnoreCase))
                 {
-                    current = new PbrMaterial { Name = p[1] };
+                    string materialName = l["newmtl".Length..].Trim();
+                    current = new PbrMaterial
+                    {
+                        Name = materialName,
+                        SourceName = materialName
+                    };
                     materials.Add(current);
-                    materialMap[p[1]] = materials.Count - 1;
+                    materialMap[materialName] = materials.Count - 1;
                 }
                 else if (current != null)
                 {
@@ -427,10 +448,64 @@ public class ObjImporter : IModelImporter
                     }
                     else if (p[0] == "Ns" && p.Length >= 2)
                         current.Roughness = 1.0f - Math.Min(1.0f, ParseFloat(p[1]) / 1000f);
+                    else if (l.StartsWith("map_Kd ", StringComparison.OrdinalIgnoreCase))
+                        current.AlbedoTexturePath = ParseTexturePath(l, "map_Kd", materialDirectory);
+                    else if (l.StartsWith("map_bump ", StringComparison.OrdinalIgnoreCase))
+                        current.NormalTexturePath = ParseTexturePath(l, "map_bump", materialDirectory);
+                    else if (l.StartsWith("bump ", StringComparison.OrdinalIgnoreCase))
+                        current.NormalTexturePath = ParseTexturePath(l, "bump", materialDirectory);
+                    else if (l.StartsWith("norm ", StringComparison.OrdinalIgnoreCase))
+                        current.NormalTexturePath = ParseTexturePath(l, "norm", materialDirectory);
+                    else if (l.StartsWith("map_Pr ", StringComparison.OrdinalIgnoreCase))
+                        current.RoughnessTexturePath = ParseTexturePath(l, "map_Pr", materialDirectory);
                 }
             }
         }
         catch { }
+    }
+
+    private static string? ParseTexturePath(string line, string keyword, string baseDirectory)
+    {
+        string remainder = line[keyword.Length..].Trim();
+        if (string.IsNullOrWhiteSpace(remainder))
+            return null;
+
+        string? directPath = ResolveTextureCandidate(baseDirectory, remainder);
+        if (directPath != null)
+            return directPath;
+
+        var tokens = remainder.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        for (int index = 0; index < tokens.Length; index++)
+        {
+            string candidate = string.Join(' ', tokens.Skip(index));
+            string? resolved = ResolveTextureCandidate(baseDirectory, candidate);
+            if (resolved != null)
+                return resolved;
+        }
+
+        return null;
+    }
+
+    private static string? ResolveTextureCandidate(string baseDirectory, string candidate)
+    {
+        string normalized = candidate.Trim().Trim('"');
+        if (string.IsNullOrWhiteSpace(normalized) || normalized.StartsWith("-", StringComparison.Ordinal))
+            return null;
+
+        string fullPath = Path.IsPathRooted(normalized)
+            ? normalized
+            : Path.Combine(baseDirectory, normalized);
+
+        try
+        {
+            fullPath = Path.GetFullPath(fullPath);
+        }
+        catch
+        {
+            return null;
+        }
+
+        return File.Exists(fullPath) ? fullPath : null;
     }
 
     private static float ParseFloat(string s)

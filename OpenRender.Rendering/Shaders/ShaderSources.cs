@@ -38,7 +38,20 @@ in vec2 TexCoord;
 uniform vec3 uAlbedo;
 uniform float uMetallic;
 uniform float uRoughness;
+uniform float uAmbientOcclusion;
 uniform float uOpacity;
+uniform float uNormalStrength;
+uniform float uUvScale;
+
+uniform sampler2D uAlbedoMap;
+uniform sampler2D uNormalMap;
+uniform sampler2D uRoughnessMap;
+uniform sampler2D uAoMap;
+
+uniform int uHasAlbedoMap;
+uniform int uHasNormalMap;
+uniform int uHasRoughnessMap;
+uniform int uHasAoMap;
 
 // Lighting
 uniform vec3 uLightDir;
@@ -53,27 +66,86 @@ uniform vec3 uViewPos;
 // Tone mapping
 uniform float uExposure;
 uniform float uGamma;
+uniform float uContrast;
+uniform float uWhiteBalance;
 
 out vec4 FragColor;
 
+vec3 ResolveNormal(vec2 uv)
+{
+    vec3 baseNormal = normalize(Normal);
+    if (uHasNormalMap == 0)
+        return baseNormal;
+
+    vec3 tangentNormal = texture(uNormalMap, uv).xyz * 2.0 - 1.0;
+    tangentNormal.xy *= uNormalStrength;
+    tangentNormal = normalize(tangentNormal);
+
+    vec3 dp1 = dFdx(FragPos);
+    vec3 dp2 = dFdy(FragPos);
+    vec2 duv1 = dFdx(uv);
+    vec2 duv2 = dFdy(uv);
+
+    float determinant = duv1.x * duv2.y - duv1.y * duv2.x;
+    if (abs(determinant) < 0.00001)
+        return baseNormal;
+
+    vec3 tangent = normalize((dp1 * duv2.y - dp2 * duv1.y) / determinant);
+    tangent = normalize(tangent - baseNormal * dot(baseNormal, tangent));
+
+    vec3 bitangent = normalize((-dp1 * duv2.x + dp2 * duv1.x) / determinant);
+    bitangent = normalize(bitangent - baseNormal * dot(baseNormal, bitangent));
+
+    mat3 tbn = mat3(tangent, bitangent, baseNormal);
+    return normalize(tbn * tangentNormal);
+}
+
+vec3 ApplyWhiteBalance(vec3 color, float whiteBalance)
+{
+    float warm = max(whiteBalance, 0.0);
+    float cool = max(-whiteBalance, 0.0);
+
+    color.r *= 1.0 + warm * 0.16 - cool * 0.04;
+    color.g *= 1.0 + warm * 0.03 - cool * 0.01;
+    color.b *= 1.0 - warm * 0.12 + cool * 0.18;
+
+    return max(color, vec3(0.0));
+}
+
 void main()
 {
-    vec3 norm = normalize(Normal);
+    vec2 uv = TexCoord * uUvScale;
+    vec3 baseColor = uAlbedo;
+    if (uHasAlbedoMap == 1)
+    {
+        vec3 sampledAlbedo = pow(texture(uAlbedoMap, uv).rgb, vec3(2.2));
+        baseColor *= sampledAlbedo;
+    }
+
+    float roughness = clamp(uRoughness, 0.04, 1.0);
+    if (uHasRoughnessMap == 1)
+        roughness = clamp(uRoughness * texture(uRoughnessMap, uv).r, 0.04, 1.0);
+
+    float ambientOcclusion = clamp(uAmbientOcclusion, 0.0, 1.0);
+    if (uHasAoMap == 1)
+        ambientOcclusion *= texture(uAoMap, uv).r;
+
+    vec3 norm = ResolveNormal(uv);
     vec3 lightDir = normalize(-uLightDir);
     vec3 viewDir = normalize(uViewPos - FragPos);
     vec3 halfDir = normalize(lightDir + viewDir);
 
     // Ambient
-    vec3 ambient = uAmbientColor * uAmbientIntensity * uAlbedo;
+    vec3 ambient = uAmbientColor * uAmbientIntensity * baseColor * ambientOcclusion;
 
     // Diffuse (Lambert)
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * uLightColor * uLightIntensity * uAlbedo;
+    vec3 diffuse = diff * uLightColor * uLightIntensity * baseColor;
 
     // Specular (Blinn-Phong approximation of GGX)
-    float shininess = mix(8.0, 256.0, 1.0 - uRoughness);
-    float spec = pow(max(dot(norm, halfDir), 0.0), shininess);
-    vec3 specColor = mix(vec3(0.04), uAlbedo, uMetallic);
+    float shininess = mix(8.0, 256.0, 1.0 - roughness);
+    float spec = pow(max(dot(norm, halfDir), 0.0), shininess) * mix(0.18, 1.0, 1.0 - roughness);
+    vec3 specColor = mix(vec3(0.04), baseColor, uMetallic);
     vec3 specular = spec * uLightColor * uLightIntensity * specColor;
 
     // Combine
@@ -82,8 +154,15 @@ void main()
     // Tone mapping (Reinhard)
     result = vec3(1.0) - exp(-result * uExposure);
 
+    // White balance before gamma
+    result = ApplyWhiteBalance(result, uWhiteBalance);
+
     // Gamma correction
     result = pow(result, vec3(1.0 / uGamma));
+
+    // Contrast pivot around mid-gray
+    result = (result - vec3(0.5)) * uContrast + vec3(0.5);
+    result = clamp(result, vec3(0.0), vec3(1.0));
 
     FragColor = vec4(result, uOpacity);
 }

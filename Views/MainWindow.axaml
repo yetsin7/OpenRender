@@ -66,6 +66,10 @@
                     <Button Content="Importar modelo"
                             Classes="toolbarBtn"
                             Command="{Binding ImportFileCommand}"/>
+                    <Button Content="Reimportar actual"
+                            Classes="toolbarBtn"
+                            Command="{Binding ReloadCurrentModelCommand}"
+                            IsVisible="{Binding HasLoadedSourceFile}"/>
                     <Button Content="Cargar estudio demo"
                             Classes="toolbarBtn"
                             Command="{Binding NewSceneCommand}"/>
@@ -226,10 +230,13 @@
 
                         <Border Classes="panelCard" Padding="14">
                             <StackPanel Spacing="10">
-                                <TextBlock Text="ARCHIVOS RECIENTES"
+                                <TextBlock Text="BIBLIOTECA IMPORTADA"
                                            Classes="sectionEyebrow"/>
-                                <ItemsControl ItemsSource="{Binding RecentFiles}"
-                                              IsVisible="{Binding HasRecentFiles}">
+                                <TextBlock Text="{Binding ImportedLibraryInfoText}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <ItemsControl ItemsSource="{Binding ImportedHistory}"
+                                              IsVisible="{Binding HasImportedHistory}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Button Margin="0,0,0,8"
@@ -237,16 +244,27 @@
                                                     HorizontalContentAlignment="Left"
                                                     Classes="recentBtn"
                                                     Command="{Binding #RootWindow.DataContext.OpenRecentFileCommand}"
-                                                    CommandParameter="{Binding}">
-                                                <TextBlock Text="{Binding}"
-                                                           TextWrapping="Wrap"
-                                                           FontSize="11"/>
+                                                    CommandParameter="{Binding FilePath}">
+                                                <StackPanel Spacing="4">
+                                                    <TextBlock Text="{Binding DisplayName}"
+                                                               TextWrapping="Wrap"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding Summary}"
+                                                               TextWrapping="Wrap"
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource TextMutedBrush}"/>
+                                                    <TextBlock Text="{Binding Meta}"
+                                                               TextWrapping="Wrap"
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                </StackPanel>
                                             </Button>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <TextBlock Text="Todavía no hay archivos recientes."
-                                           IsVisible="{Binding !HasRecentFiles}"
+                                <TextBlock Text="Todavía no hay modelos guardados en la biblioteca local."
+                                           IsVisible="{Binding !HasImportedHistory}"
                                            FontSize="11"
                                            Foreground="{DynamicResource TextMutedBrush}"/>
                             </StackPanel>
@@ -423,6 +441,10 @@
                                            FontSize="12"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding SelectedMaterialSourceText}"
+                                           FontSize="11"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 <TextBlock Text="{Binding SelectedMaterialUsageText}"
                                            FontSize="11"
                                            Foreground="{DynamicResource TextMutedBrush}"/>
@@ -633,6 +655,27 @@
                                     <TextBlock Text="Ambiente" Width="86" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                     <TextBlock DockPanel.Dock="Right" Text="{Binding AmbientIntensity, StringFormat={}{0:F2}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
                                     <Slider Minimum="0" Maximum="1" Value="{Binding AmbientIntensity}" Margin="8,0,8,0"/>
+                                </DockPanel>
+                                <Separator Margin="0,4,0,2"/>
+                                <DockPanel>
+                                    <TextBlock Text="Exposición" Width="86" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding PhotoExposure, StringFormat={}{0:F2}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <Slider Minimum="0.40" Maximum="2.20" Value="{Binding PhotoExposure}" Margin="8,0,8,0"/>
+                                </DockPanel>
+                                <DockPanel>
+                                    <TextBlock Text="Gamma" Width="86" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding PhotoGamma, StringFormat={}{0:F2}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <Slider Minimum="1.40" Maximum="2.80" Value="{Binding PhotoGamma}" Margin="8,0,8,0"/>
+                                </DockPanel>
+                                <DockPanel>
+                                    <TextBlock Text="Contraste" Width="86" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding PhotoContrast, StringFormat={}{0:F2}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <Slider Minimum="0.70" Maximum="1.40" Value="{Binding PhotoContrast}" Margin="8,0,8,0"/>
+                                </DockPanel>
+                                <DockPanel>
+                                    <TextBlock Text="Temperatura" Width="86" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding PhotoWhiteBalance, StringFormat={}{0:F2}}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <Slider Minimum="-0.40" Maximum="0.40" Value="{Binding PhotoWhiteBalance}" Margin="8,0,8,0"/>
                                 </DockPanel>
                                 <TextBlock Text="{Binding SunStatusText}"
                                            FontSize="11"

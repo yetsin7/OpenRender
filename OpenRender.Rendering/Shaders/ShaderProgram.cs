@@ -71,6 +71,14 @@ public class ShaderProgram : IDisposable
     }
 
     /// <summary>
+    /// Sets an int uniform value.
+    /// </summary>
+    public void SetInt(string name, int value)
+    {
+        _gl.Uniform1(GetUniformLocation(name), value);
+    }
+
+    /// <summary>
     /// Sets a vec3 uniform value.
     /// </summary>
     public void SetVec3(string name, float x, float y, float z)

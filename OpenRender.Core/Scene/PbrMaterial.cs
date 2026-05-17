@@ -25,6 +25,11 @@ public partial class PbrMaterial : ObservableObject
     [ObservableProperty] private string? _presetKey;
 
     /// <summary>
+    /// Original imported material name used to reconnect overrides after re-import.
+    /// </summary>
+    [ObservableProperty] private string? _sourceName;
+
+    /// <summary>
     /// Number of scene nodes using this material.
     /// </summary>
     [ObservableProperty] private int _usageCount;
@@ -64,6 +69,11 @@ public partial class PbrMaterial : ObservableObject
     /// </summary>
     [ObservableProperty] private float _normalStrength = 1.0f;
 
+    /// <summary>
+    /// UV tiling scale applied on top of imported coordinates.
+    /// </summary>
+    [ObservableProperty] private float _uvScale = 1.0f;
+
     // Texture paths (resolved at render time)
     [ObservableProperty] private string? _albedoTexturePath;
     [ObservableProperty] private string? _normalTexturePath;
@@ -78,6 +88,7 @@ public partial class PbrMaterial : ObservableObject
             Name = newName ?? Name,
             Category = Category,
             PresetKey = PresetKey,
+            SourceName = SourceName,
             UsageCount = UsageCount,
             Albedo = Albedo,
             Metallic = Metallic,
@@ -86,6 +97,7 @@ public partial class PbrMaterial : ObservableObject
             Opacity = Opacity,
             Emissive = Emissive,
             NormalStrength = NormalStrength,
+            UvScale = UvScale,
             AlbedoTexturePath = AlbedoTexturePath,
             NormalTexturePath = NormalTexturePath,
             MetallicTexturePath = MetallicTexturePath,

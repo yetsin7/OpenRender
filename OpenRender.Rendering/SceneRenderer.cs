@@ -1,3 +1,4 @@
+using System.IO;
 using System.Numerics;
 using Silk.NET.OpenGL;
 using OpenRender.Core.Scene;
@@ -16,6 +17,7 @@ public class SceneRenderer : IDisposable
     private ShaderProgram? _gridShader;
     private ViewCubeRenderer? _viewCube;
     private readonly Dictionary<string, GpuMesh> _meshCache = new();
+    private readonly Dictionary<string, GlTexture2D> _textureCache = new(StringComparer.OrdinalIgnoreCase);
     private GpuMesh? _gridMesh;
     private bool _disposed;
 
@@ -122,8 +124,10 @@ public class SceneRenderer : IDisposable
         _pbrShader.SetMat4("uView", view);
         _pbrShader.SetMat4("uProjection", projection);
         _pbrShader.SetVec3("uViewPos", scene.Camera.Position);
-        _pbrShader.SetFloat("uExposure", 1.0f);
-        _pbrShader.SetFloat("uGamma", 2.2f);
+        _pbrShader.SetFloat("uExposure", MathF.Max(0.1f, scene.Exposure));
+        _pbrShader.SetFloat("uGamma", MathF.Max(0.8f, scene.Gamma));
+        _pbrShader.SetFloat("uContrast", MathF.Max(0.4f, scene.Contrast));
+        _pbrShader.SetFloat("uWhiteBalance", Math.Clamp(scene.WhiteBalance, -1.0f, 1.0f));
 
         // Set lighting (use first directional light or default sun)
         var sun = scene.Lights.FirstOrDefault(l => l.Type == LightType.Directional && l.IsEnabled);
@@ -142,6 +146,10 @@ public class SceneRenderer : IDisposable
 
         _pbrShader.SetVec3("uAmbientColor", 1.0f, 1.0f, 1.0f);
         _pbrShader.SetFloat("uAmbientIntensity", Math.Max(0.05f, scene.AmbientIntensity));
+        _pbrShader.SetInt("uAlbedoMap", 0);
+        _pbrShader.SetInt("uNormalMap", 1);
+        _pbrShader.SetInt("uRoughnessMap", 2);
+        _pbrShader.SetInt("uAoMap", 3);
 
         // Traverse and render all nodes
         foreach (var node in scene.GetAllNodes())
@@ -181,10 +189,60 @@ public class SceneRenderer : IDisposable
         _pbrShader.SetVec3("uAlbedo", material.Albedo);
         _pbrShader.SetFloat("uMetallic", material.Metallic);
         _pbrShader.SetFloat("uRoughness", material.Roughness);
+        _pbrShader.SetFloat("uAmbientOcclusion", material.AmbientOcclusion);
         _pbrShader.SetFloat("uOpacity", material.Opacity);
+        _pbrShader.SetFloat("uNormalStrength", material.NormalStrength);
+        _pbrShader.SetFloat("uUvScale", MathF.Max(0.0001f, material.UvScale));
+
+        BindMaterialTextures(material);
 
         // Draw
         gpuMesh.Draw();
+    }
+
+    private void BindMaterialTextures(PbrMaterial material)
+    {
+        BindTexture(material.AlbedoTexturePath, 0, "uHasAlbedoMap");
+        BindTexture(material.NormalTexturePath, 1, "uHasNormalMap");
+        BindTexture(material.RoughnessTexturePath, 2, "uHasRoughnessMap");
+        BindTexture(material.AoTexturePath, 3, "uHasAoMap");
+    }
+
+    private void BindTexture(string? filePath, int slot, string hasUniformName)
+    {
+        var texture = GetTexture(filePath);
+        _pbrShader!.SetInt(hasUniformName, texture == null ? 0 : 1);
+
+        if (texture == null)
+            return;
+
+        texture.Bind((TextureUnit)((int)TextureUnit.Texture0 + slot));
+    }
+
+    private GlTexture2D? GetTexture(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return null;
+
+        string resolvedPath;
+        try
+        {
+            resolvedPath = Path.GetFullPath(filePath);
+        }
+        catch
+        {
+            return null;
+        }
+
+        if (!File.Exists(resolvedPath))
+            return null;
+
+        if (_textureCache.TryGetValue(resolvedPath, out var cached))
+            return cached;
+
+        var texture = new GlTexture2D(_gl, resolvedPath);
+        _textureCache[resolvedPath] = texture;
+        return texture;
     }
 
     private GpuMesh GetOrCreateGpuMesh(MeshData meshData)
@@ -206,6 +264,10 @@ public class SceneRenderer : IDisposable
         foreach (var mesh in _meshCache.Values)
             mesh.Dispose();
         _meshCache.Clear();
+
+        foreach (var texture in _textureCache.Values)
+            texture.Dispose();
+        _textureCache.Clear();
     }
 
     public void Dispose()

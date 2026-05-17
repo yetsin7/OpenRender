@@ -44,6 +44,26 @@ public class Scene3D
     public float AmbientIntensity { get; set; } = 0.15f;
 
     /// <summary>
+    /// Exposure multiplier used by tone mapping.
+    /// </summary>
+    public float Exposure { get; set; } = 1.05f;
+
+    /// <summary>
+    /// Gamma correction value.
+    /// </summary>
+    public float Gamma { get; set; } = 2.2f;
+
+    /// <summary>
+    /// Simple contrast control for photo styling.
+    /// </summary>
+    public float Contrast { get; set; } = 1.02f;
+
+    /// <summary>
+    /// White balance offset. Negative cools the image, positive warms it.
+    /// </summary>
+    public float WhiteBalance { get; set; } = 0.0f;
+
+    /// <summary>
     /// Gets all nodes in the scene using a depth-first traversal.
     /// </summary>
     public IEnumerable<SceneNode> GetAllNodes()
