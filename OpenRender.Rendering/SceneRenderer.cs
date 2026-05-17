@@ -57,7 +57,7 @@ public class SceneRenderer : IDisposable
         _viewCube.Initialize();
 
         // Create grid mesh (large enough for architectural models)
-        var gridData = Primitives.PrimitiveGenerator.CreateGrid(400, 10.0f);
+        var gridData = Primitives.PrimitiveGenerator.CreateGrid(120, 2.5f);
         _gridMesh = new GpuMesh(_gl, gridData);
 
         // OpenGL state

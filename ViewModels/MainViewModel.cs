@@ -31,6 +31,7 @@ public partial class SceneNodeViewModel : ObservableObject
     [ObservableProperty] private string _subtitle = "";
     [ObservableProperty] private bool _isVisible = true;
     [ObservableProperty] private bool _isSelected;
+    [ObservableProperty] private bool _isModelScope;
 
     partial void OnIsVisibleChanged(bool value)
     {
@@ -98,9 +99,9 @@ public partial class MainViewModel : ObservableObject
         LoadMaterialLibrary();
         RefreshImportedHistory();
 
-        Scene = CreateDefaultScene();
-        ApplyScene(Scene, "Estudio demo");
-        StatusText = "Estudio listo. Importa un modelo o usa la villa demo.";
+        Scene = CreateWorkspaceScene();
+        ApplyScene(Scene, "Estudio limpio");
+        StatusText = "Estudio listo. Importa un modelo para comenzar.";
 
         if (!string.IsNullOrEmpty(GlErrorMessage))
             StatusText = GlErrorMessage;
@@ -121,6 +122,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _workspaceSubtitle = "Viewport en tiempo real, materiales y salida de imagen.";
     [ObservableProperty] private string _sceneFilterText = "";
     [ObservableProperty] private string? _currentSourceFilePath;
+    [ObservableProperty] private string _interactionMode = "Object";
 
     [ObservableProperty] private bool _hasModel;
     [ObservableProperty] private bool _isLoading;
@@ -161,6 +163,8 @@ public partial class MainViewModel : ObservableObject
     public bool HasImportedHistory => ImportedHistory.Count > 0;
     public bool HasLoadedSourceFile => !string.IsNullOrWhiteSpace(CurrentSourceFilePath);
     public bool ShowEmptyState => !HasModel;
+    public bool IsObjectSelectionMode => !string.Equals(InteractionMode, "Material", StringComparison.OrdinalIgnoreCase);
+    public bool IsMaterialPaintMode => !IsObjectSelectionMode;
     public string WorkspaceModeText => HasModel ? "Proyecto cargado" : "Estudio base";
     public string CurrentSceneLabel => Scene.Name;
     public string SelectedNodeTitle => SelectedSceneNode?.Name ?? "Selecciona un objeto";
@@ -322,8 +326,8 @@ public partial class MainViewModel : ObservableObject
             var manager = new OpenRender.Rendering.Import.ImportManager();
             var options = new ImportOptions
             {
-                SwapYZ = AutoFixOrientation,
-                Recenter = AutoRecenter,
+                SwapYZ = true,
+                Recenter = true,
                 GenerateNormals = true
             };
 
@@ -372,8 +376,8 @@ public partial class MainViewModel : ObservableObject
     private void NewScene()
     {
         CurrentSourceFilePath = null;
-        ApplyScene(CreateDefaultScene(), "Estudio demo");
-        StatusText = "Estudio demo recargado.";
+        ApplyScene(CreateWorkspaceScene(), "Estudio limpio");
+        StatusText = "Estudio limpio listo para importar.";
     }
 
     [RelayCommand]
@@ -605,6 +609,26 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void SetInteractionMode(string mode)
+    {
+        InteractionMode = string.Equals(mode, "Material", StringComparison.OrdinalIgnoreCase)
+            ? "Material"
+            : "Object";
+
+        if (HasModel)
+        {
+            if (IsObjectSelectionMode)
+                SelectWholeModelFromViewport();
+            else if (SelectedSceneNode == null || SelectedSceneNode.IsModelScope)
+                SelectFirstRenderableSurface();
+        }
+
+        StatusText = IsMaterialPaintMode
+            ? "Modo material activo. Haz clic en una superficie para editarla."
+            : "Modo objeto activo. Un clic selecciona el modelo completo.";
+    }
+
+    [RelayCommand]
     private void SetResolutionPreset(string preset)
     {
         switch (preset.ToUpperInvariant())
@@ -787,7 +811,15 @@ public partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(HasSelectedMeshNode));
 
         if (value != null)
-            StatusText = $"Inspector enfocado en {value.Name}.";
+            StatusText = value.IsModelScope
+                ? $"Modelo seleccionado: {value.Name}."
+                : $"Inspector enfocado en {value.Name}.";
+    }
+
+    partial void OnInteractionModeChanged(string value)
+    {
+        OnPropertyChanged(nameof(IsObjectSelectionMode));
+        OnPropertyChanged(nameof(IsMaterialPaintMode));
     }
 
     partial void OnSelectedMaterialChanged(PbrMaterial? value)
@@ -966,8 +998,23 @@ public partial class MainViewModel : ObservableObject
     {
         var selectedNodeId = SelectedSceneNode?.Node?.Id;
         var selectedLightName = SelectedSceneNode?.Light?.Name;
+        bool selectedModelScope = SelectedSceneNode?.IsModelScope == true;
 
         _allSceneNodes.Clear();
+
+        if (HasModel)
+        {
+            _allSceneNodes.Add(new SceneNodeViewModel
+            {
+                Name = string.IsNullOrWhiteSpace(CurrentSourceFilePath)
+                    ? WorkspaceTitle
+                    : Path.GetFileNameWithoutExtension(CurrentSourceFilePath),
+                Icon = "MOD",
+                Subtitle = SceneInfoText,
+                IsVisible = true,
+                IsModelScope = true
+            });
+        }
 
         foreach (var light in Scene.Lights)
         {
@@ -980,14 +1027,6 @@ public partial class MainViewModel : ObservableObject
                 IsVisible = light.IsEnabled
             });
         }
-
-        _allSceneNodes.Add(new SceneNodeViewModel
-        {
-            Name = "Camera",
-            Icon = "CAM",
-            Subtitle = $"FOV {Scene.Camera.FieldOfView:F0}° · Dist {Scene.Camera.OrbitDistance:F1}",
-            IsVisible = true
-        });
 
         foreach (var node in Scene.GetAllNodes())
         {
@@ -1002,7 +1041,7 @@ public partial class MainViewModel : ObservableObject
             });
         }
 
-        RefreshVisibleSceneNodes(selectedNodeId, selectedLightName);
+        RefreshVisibleSceneNodes(selectedNodeId, selectedLightName, selectedModelScope);
     }
 
     private string BuildNodeSubtitle(SceneNode node)
@@ -1567,6 +1606,36 @@ public partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(HasRecentFiles));
     }
 
+    public void SelectViewportHit(string? nodeId)
+    {
+        if (!HasModel)
+            return;
+
+        if (IsObjectSelectionMode || string.IsNullOrWhiteSpace(nodeId))
+        {
+            SelectWholeModelFromViewport();
+            return;
+        }
+
+        var sceneItem = _allSceneNodes.FirstOrDefault(item => string.Equals(item.Node?.Id, nodeId, StringComparison.Ordinal));
+        if (sceneItem != null)
+            SelectedSceneNode = sceneItem;
+    }
+
+    private void SelectWholeModelFromViewport()
+    {
+        SelectedSceneNode = _allSceneNodes.FirstOrDefault(item => item.IsModelScope)
+            ?? _allSceneNodes.FirstOrDefault(item => item.Node?.Mesh != null)
+            ?? _allSceneNodes.FirstOrDefault();
+    }
+
+    private void SelectFirstRenderableSurface()
+    {
+        SelectedSceneNode = _allSceneNodes.FirstOrDefault(item => item.Node?.Mesh != null)
+            ?? _allSceneNodes.FirstOrDefault(item => item.IsModelScope)
+            ?? _allSceneNodes.FirstOrDefault();
+    }
+
     private static bool NearlyEqual(float left, float right)
     {
         return MathF.Abs(left - right) <= 0.0005f;
@@ -1579,7 +1648,7 @@ public partial class MainViewModel : ObservableObject
                NearlyEqual(left.Z, right.Z);
     }
 
-    private void RefreshVisibleSceneNodes(string? preferredNodeId = null, string? preferredLightName = null)
+    private void RefreshVisibleSceneNodes(string? preferredNodeId = null, string? preferredLightName = null, bool preferModelScope = false)
     {
         string filter = SceneFilterText.Trim();
         IEnumerable<SceneNodeViewModel> source = _allSceneNodes;
@@ -1600,6 +1669,9 @@ public partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(SceneNodeCount));
 
         SelectedSceneNode =
+            (preferModelScope || IsObjectSelectionMode
+                ? SceneNodes.FirstOrDefault(item => item.IsModelScope)
+                : null) ??
             SceneNodes.FirstOrDefault(item => item.Node?.Id == preferredNodeId) ??
             SceneNodes.FirstOrDefault(item => item.Light?.Name == preferredLightName) ??
             SceneNodes.FirstOrDefault(item => item.Node?.Mesh != null) ??
@@ -1666,6 +1738,20 @@ public partial class MainViewModel : ObservableObject
         {
             StatusText = "Smoke test de navegación completo.";
         }
+    }
+
+    private static Scene3D CreateWorkspaceScene()
+    {
+        return new Scene3D
+        {
+            Name = "Estudio vacío",
+            AmbientIntensity = 0.18f,
+            BackgroundColor = new Vector3(0.52f, 0.68f, 0.85f),
+            Exposure = 1.02f,
+            Gamma = 2.18f,
+            Contrast = 1.01f,
+            WhiteBalance = 0.02f
+        };
     }
 
     private static Scene3D CreateDefaultScene()

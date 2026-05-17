@@ -77,6 +77,7 @@ public class ViewportControl : OpenGlControlBase
     private double _totalDragDistance;
     private string? _pressedViewCubeFace;
     private Avalonia.Point _lastMousePos;
+    private Avalonia.Point _leftPointerDownPos;
     private readonly HashSet<Key> _pressedKeys = new();
     private long _lastMiddleClickTime;
     private bool _sceneJustChanged;
@@ -284,6 +285,8 @@ public class ViewportControl : OpenGlControlBase
         }
         else if (point.Properties.IsLeftButtonPressed)
         {
+            _leftPointerDownPos = point.Position;
+            _totalDragDistance = 0;
             string? face = HitTestViewCube(point.Position);
             if (face != null)
             {
@@ -339,6 +342,8 @@ public class ViewportControl : OpenGlControlBase
             }
             else
             {
+                if (_totalDragDistance < 6)
+                    HandleViewportSelection(e.GetPosition(this));
                 _isOrbiting = false;
             }
         }
@@ -373,6 +378,7 @@ public class ViewportControl : OpenGlControlBase
         }
         else if (_isOrbiting)
         {
+            _totalDragDistance += Math.Abs(dx) + Math.Abs(dy);
             _scene.Camera.Orbit(dx, dy);
         }
         else if (_isPanning)
@@ -422,6 +428,106 @@ public class ViewportControl : OpenGlControlBase
             Bounds.Width,
             Bounds.Height,
             renderScaling);
+    }
+
+    private void HandleViewportSelection(Avalonia.Point screenPos)
+    {
+        if (_scene == null || DataContext is not MainViewModel vm)
+            return;
+
+        string? hitNodeId = FindBestSceneNodeHit(screenPos);
+        vm.SelectViewportHit(hitNodeId);
+    }
+
+    private string? FindBestSceneNodeHit(Avalonia.Point screenPos)
+    {
+        if (_scene == null || Bounds.Width <= 1 || Bounds.Height <= 1)
+            return null;
+
+        var view = _scene.Camera.GetViewMatrix();
+        var projection = _scene.Camera.GetProjectionMatrix();
+        var viewProjection = view * projection;
+
+        string? bestNodeId = null;
+        float bestDepth = float.MaxValue;
+        const float screenPadding = 6f;
+
+        foreach (var node in _scene.GetAllNodes().Where(item => item.IsVisible && item.Mesh != null))
+        {
+            if (!TryProjectNodeBounds(node, viewProjection, (float)Bounds.Width, (float)Bounds.Height, out var min, out var max, out float depth))
+                continue;
+
+            if (screenPos.X < min.X - screenPadding || screenPos.X > max.X + screenPadding ||
+                screenPos.Y < min.Y - screenPadding || screenPos.Y > max.Y + screenPadding)
+            {
+                continue;
+            }
+
+            if (depth < bestDepth)
+            {
+                bestDepth = depth;
+                bestNodeId = node.Id;
+            }
+        }
+
+        return bestNodeId;
+    }
+
+    private static bool TryProjectNodeBounds(
+        SceneNode node,
+        Matrix4x4 viewProjection,
+        float viewportWidth,
+        float viewportHeight,
+        out Vector2 minScreen,
+        out Vector2 maxScreen,
+        out float depth)
+    {
+        minScreen = new Vector2(float.MaxValue);
+        maxScreen = new Vector2(float.MinValue);
+        depth = float.MaxValue;
+
+        if (node.Mesh == null)
+            return false;
+
+        var (localMin, localMax) = node.Mesh.ComputeBoundingBox();
+        var corners = new[]
+        {
+            new Vector3(localMin.X, localMin.Y, localMin.Z),
+            new Vector3(localMax.X, localMin.Y, localMin.Z),
+            new Vector3(localMin.X, localMax.Y, localMin.Z),
+            new Vector3(localMax.X, localMax.Y, localMin.Z),
+            new Vector3(localMin.X, localMin.Y, localMax.Z),
+            new Vector3(localMax.X, localMin.Y, localMax.Z),
+            new Vector3(localMin.X, localMax.Y, localMax.Z),
+            new Vector3(localMax.X, localMax.Y, localMax.Z)
+        };
+
+        var model = node.GetLocalTransform();
+        bool anyCornerVisible = false;
+
+        for (int i = 0; i < 8; i++)
+        {
+            Vector3 world = Vector3.Transform(corners[i], model);
+            var clip = Vector4.Transform(new Vector4(world, 1f), viewProjection);
+
+            if (Math.Abs(clip.W) < 0.00001f)
+                continue;
+
+            float inverseW = 1f / clip.W;
+            float ndcX = clip.X * inverseW;
+            float ndcY = clip.Y * inverseW;
+            float ndcZ = clip.Z * inverseW;
+
+            float screenX = (ndcX * 0.5f + 0.5f) * viewportWidth;
+            float screenY = (1f - (ndcY * 0.5f + 0.5f)) * viewportHeight;
+
+            minScreen = Vector2.Min(minScreen, new Vector2(screenX, screenY));
+            maxScreen = Vector2.Max(maxScreen, new Vector2(screenX, screenY));
+            depth = Math.Min(depth, ndcZ);
+            anyCornerVisible = true;
+        }
+
+        return anyCornerVisible;
     }
 
     private sealed record CaptureRequest(

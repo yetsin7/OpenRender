@@ -1,5 +1,10 @@
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
+using OpenRender.Controls;
 using OpenRender.ViewModels;
 
 namespace OpenRender.Views;
@@ -64,6 +69,7 @@ public partial class MainWindow : Window
             return;
 
         _startupHandled = true;
+        FocusViewport();
         var options = LaunchContext.Options;
 
         if (string.IsNullOrWhiteSpace(options.StartupFilePath))
@@ -76,5 +82,44 @@ public partial class MainWindow : Window
 
         if (options.RunSmokeTest && options.ExitAfterSmokeTest)
             Close();
+    }
+
+    private void FocusViewport()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            this.FindControl<ViewportControl>("ViewportHost")?.Focus();
+        }, DispatcherPriority.Background);
+    }
+
+    private void HeaderBar_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+            return;
+
+        if (e.Source is Control control &&
+            control.GetSelfAndVisualAncestors().OfType<Button>().Any())
+        {
+            return;
+        }
+
+        BeginMoveDrag(e);
+    }
+
+    private void MinimizeWindow_Click(object? sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
+
+    private void ToggleMaximizeWindow_Click(object? sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
+    }
+
+    private void CloseWindow_Click(object? sender, RoutedEventArgs e)
+    {
+        Close();
     }
 }

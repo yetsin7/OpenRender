@@ -188,7 +188,7 @@ out vec4 FragColor;
 void main()
 {
     float dist = length(FragPos.xz);
-    float fade = 1.0 - smoothstep(2000.0, 5000.0, dist);
+    float fade = 1.0 - smoothstep(75.0, 150.0, dist);
     FragColor = vec4(uGridColor, uGridAlpha * fade);
 }
 ";
