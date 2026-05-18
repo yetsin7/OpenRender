@@ -9,11 +9,11 @@ public unsafe partial class VulkanRenderer
     {
         CreateSwapchain(preferredWidth, preferredHeight);
         CreateImageViews();
+        CreateDepthResources();
 
         if (_advancedPipelineEnabled)
         {
             CreateGBufferResources();
-            CreateDepthResources();
         }
     }
 
@@ -168,9 +168,28 @@ public unsafe partial class VulkanRenderer
             InitialLayout = ImageLayout.Undefined,
             FinalLayout = ImageLayout.PresentSrcKhr
         };
+        var depthAttachment = new AttachmentDescription
+        {
+            Format = _depthFormat,
+            Samples = SampleCountFlags.Count1Bit,
+            LoadOp = AttachmentLoadOp.Clear,
+            StoreOp = AttachmentStoreOp.DontCare,
+            StencilLoadOp = AttachmentLoadOp.DontCare,
+            StencilStoreOp = AttachmentStoreOp.DontCare,
+            InitialLayout = ImageLayout.Undefined,
+            FinalLayout = ImageLayout.DepthStencilAttachmentOptimal
+        };
         var colorReference = new AttachmentReference { Attachment = 0, Layout = ImageLayout.ColorAttachmentOptimal };
-        var subpass = new SubpassDescription { PipelineBindPoint = PipelineBindPoint.Graphics, ColorAttachmentCount = 1, PColorAttachments = &colorReference };
-        var createInfo = new RenderPassCreateInfo { SType = StructureType.RenderPassCreateInfo, AttachmentCount = 1, PAttachments = &colorAttachment, SubpassCount = 1, PSubpasses = &subpass };
+        var depthReference = new AttachmentReference { Attachment = 1, Layout = ImageLayout.DepthStencilAttachmentOptimal };
+        var subpass = new SubpassDescription
+        {
+            PipelineBindPoint = PipelineBindPoint.Graphics,
+            ColorAttachmentCount = 1,
+            PColorAttachments = &colorReference,
+            PDepthStencilAttachment = &depthReference
+        };
+        var attachments = stackalloc[] { colorAttachment, depthAttachment };
+        var createInfo = new RenderPassCreateInfo { SType = StructureType.RenderPassCreateInfo, AttachmentCount = 2, PAttachments = attachments, SubpassCount = 1, PSubpasses = &subpass };
         Check(_context.Vk.CreateRenderPass(_context.Device, &createInfo, null, out _renderPass), "create minimal render pass");
     }
 
@@ -182,13 +201,13 @@ public unsafe partial class VulkanRenderer
         {
             if (!_advancedPipelineEnabled)
             {
-                var attachment = _swapchainImageViews[index];
+                var minimalAttachments = stackalloc[] { _swapchainImageViews[index], _depthImage!.View };
                 var createInfo = new FramebufferCreateInfo
                 {
                     SType = StructureType.FramebufferCreateInfo,
                     RenderPass = _renderPass,
-                    AttachmentCount = 1,
-                    PAttachments = &attachment,
+                    AttachmentCount = 2,
+                    PAttachments = minimalAttachments,
                     Width = _swapchainExtent.Width,
                     Height = _swapchainExtent.Height,
                     Layers = 1

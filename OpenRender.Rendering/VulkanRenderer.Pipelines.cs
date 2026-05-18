@@ -11,16 +11,17 @@ public unsafe partial class VulkanRenderer
 {
     private void CreatePipelineResources()
     {
-        if (!_advancedPipelineEnabled)
-            return;
-
         CreateDescriptorSetLayouts();
         CreateGraphicsPipeline();
-        CreateSSAOPipeline();
-        CreateCompositePipeline();
         CreateUniformBuffers();
         CreateDescriptorPool();
         CreateDescriptorSets();
+
+        if (!_advancedPipelineEnabled)
+            return;
+
+        CreateSSAOPipeline();
+        CreateCompositePipeline();
     }
 
     private void CreateDescriptorSetLayouts()
@@ -28,6 +29,9 @@ public unsafe partial class VulkanRenderer
         var uniformBinding = new DescriptorSetLayoutBinding { Binding = 0, DescriptorType = DescriptorType.UniformBuffer, DescriptorCount = 1, StageFlags = ShaderStageFlags.VertexBit | ShaderStageFlags.FragmentBit };
         var uniformInfo = new DescriptorSetLayoutCreateInfo { SType = StructureType.DescriptorSetLayoutCreateInfo, BindingCount = 1, PBindings = &uniformBinding };
         _context.Vk.CreateDescriptorSetLayout(_context.Device, &uniformInfo, null, out _descriptorSetLayout);
+
+        if (!_advancedPipelineEnabled)
+            return;
 
         var ssaoBindings = stackalloc DescriptorSetLayoutBinding[5];
         ssaoBindings[0] = new DescriptorSetLayoutBinding { Binding = 0, DescriptorType = DescriptorType.UniformBuffer, DescriptorCount = 1, StageFlags = ShaderStageFlags.FragmentBit };
@@ -49,7 +53,7 @@ public unsafe partial class VulkanRenderer
 
     private void CreateGraphicsPipeline()
     {
-        string shaderPath = ResolveShaderPath("Pbr.hlsl");
+        string shaderPath = ResolveShaderPath(_advancedPipelineEnabled ? "Pbr.hlsl" : "PbrStable.hlsl");
         var shaderSource = File.ReadAllText(shaderPath);
         using var vertexShader = new VulkanShader(_context, shaderSource, ShaderKind.VertexShader, "VSMain");
         using var fragmentShader = new VulkanShader(_context, shaderSource, ShaderKind.FragmentShader, "PSMain");
@@ -64,7 +68,7 @@ public unsafe partial class VulkanRenderer
         fixed (VertexInputAttributeDescription* attributePointer = attributes)
         {
             var vertexInput = new PipelineVertexInputStateCreateInfo { SType = StructureType.PipelineVertexInputStateCreateInfo, VertexBindingDescriptionCount = (uint)bindings.Length, PVertexBindingDescriptions = bindingPointer, VertexAttributeDescriptionCount = (uint)attributes.Length, PVertexAttributeDescriptions = attributePointer };
-            CreatePipeline(stages, 2, vertexInput, _descriptorSetLayout, out _pipelineLayout, out _graphicsPipeline, 3, true);
+            CreatePipeline(stages, 2, vertexInput, _descriptorSetLayout, out _pipelineLayout, out _graphicsPipeline, _advancedPipelineEnabled ? 3u : 1u, true);
         }
 
         FreeShaderStageNames(stages, 2);

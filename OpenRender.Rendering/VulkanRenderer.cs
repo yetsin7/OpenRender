@@ -114,7 +114,7 @@ public unsafe partial class VulkanRenderer : IDisposable
         foreach (var mesh in _meshes)
         {
             vertexBuffers[0] = mesh.VertexBuffer.Buffer;
-            vertexBuffers[1] = mesh.InstanceBuffer?.Buffer ?? mesh.VertexBuffer.Buffer;
+            vertexBuffers[1] = mesh.InstanceBuffer!.Buffer;
             _context.Vk.CmdBindVertexBuffers(commandBuffer, 0, 2, vertexBuffers, offsets);
             _context.Vk.CmdBindIndexBuffer(commandBuffer, mesh.IndexBuffer.Buffer, 0, IndexType.Uint32);
             _context.Vk.CmdDrawIndexed(commandBuffer, mesh.IndexCount, mesh.InstanceCount, 0, 0, 0);
@@ -163,11 +163,7 @@ public unsafe partial class VulkanRenderer : IDisposable
     public void Dispose()
     {
         _context.Vk.DeviceWaitIdle(_context.Device);
-
-        foreach (var mesh in _meshes)
-            mesh.Dispose();
-
-        _meshes.Clear();
+        ClearSceneMeshes();
         CleanupSwapchain();
         DisposeBufferArray(_uniformBuffers);
         DisposeBufferArray(_ssaoParamsBuffers);

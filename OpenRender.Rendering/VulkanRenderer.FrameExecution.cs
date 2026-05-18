@@ -32,6 +32,10 @@ public unsafe partial class VulkanRenderer
     private void CreateDescriptorSets()
     {
         AllocateSceneDescriptorSets();
+
+        if (!_advancedPipelineEnabled)
+            return;
+
         AllocateSsaoDescriptorSets();
         AllocateCompositeDescriptorSets();
     }
@@ -138,7 +142,7 @@ public unsafe partial class VulkanRenderer
 
         if (!_advancedPipelineEnabled)
         {
-            RenderMinimalFrame(time);
+            RenderMinimalFrame(viewProjection, cameraPosition, time);
             return;
         }
 
@@ -220,7 +224,7 @@ public unsafe partial class VulkanRenderer
         }
     }
 
-    private void RenderMinimalFrame(float time)
+    private void RenderMinimalFrame(Matrix4x4 viewProjection, Vector3 cameraPosition, float time)
     {
         if (_swapchainExt == null || _swapchainFramebuffers.Length == 0 || _renderPass.Handle == 0 || _commandBuffer.Handle == 0)
             return;
@@ -242,9 +246,14 @@ public unsafe partial class VulkanRenderer
         Check(_context.Vk.BeginCommandBuffer(_commandBuffer, &beginInfo), "begin command buffer");
 
         float pulse = 0.5f + MathF.Sin(time * 0.6f) * 0.5f;
-        var clearColor = new ClearValue { Color = new ClearColorValue(0.035f + pulse * 0.015f, 0.075f + pulse * 0.020f, 0.105f + pulse * 0.025f, 1.0f) };
-        var renderPassInfo = new RenderPassBeginInfo { SType = StructureType.RenderPassBeginInfo, RenderPass = _renderPass, Framebuffer = _swapchainFramebuffers[imageIndex], RenderArea = new Rect2D { Extent = _swapchainExtent }, ClearValueCount = 1, PClearValues = &clearColor };
+        var clearValues = stackalloc ClearValue[2];
+        clearValues[0] = new ClearValue { Color = new ClearColorValue(0.035f + pulse * 0.015f, 0.075f + pulse * 0.020f, 0.105f + pulse * 0.025f, 1.0f) };
+        clearValues[1] = new ClearValue { DepthStencil = new ClearDepthStencilValue(1.0f, 0) };
+        _uniformBuffers[imageIndex].UpdateData(new[] { new SceneBuffer { ViewProjection = viewProjection, CameraPos = cameraPosition, Time = time, LightDir = new Vector3(0.35f, -1f, 0.25f), LightColor = new Vector3(1.0f, 0.97f, 0.92f), LightIntensity = 1.85f } });
+        var renderPassInfo = new RenderPassBeginInfo { SType = StructureType.RenderPassBeginInfo, RenderPass = _renderPass, Framebuffer = _swapchainFramebuffers[imageIndex], RenderArea = new Rect2D { Extent = _swapchainExtent }, ClearValueCount = 2, PClearValues = clearValues };
         _context.Vk.CmdBeginRenderPass(_commandBuffer, &renderPassInfo, SubpassContents.Inline);
+        _context.Vk.CmdBindDescriptorSets(_commandBuffer, PipelineBindPoint.Graphics, _pipelineLayout, 0, 1, ref _descriptorSets[imageIndex], 0, null);
+        ExecuteMainPass(_commandBuffer, viewProjection, cameraPosition, time);
         _context.Vk.CmdEndRenderPass(_commandBuffer);
         Check(_context.Vk.EndCommandBuffer(_commandBuffer), "end command buffer");
 

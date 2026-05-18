@@ -42,12 +42,18 @@ public class GpuMesh : IDisposable
             MemoryPropertyFlags.HostVisibleBit | MemoryPropertyFlags.HostCoherentBit
         );
         _indexBuffer.UpdateData(indices);
+        CreateInstanceBuffer(new[] { Matrix4x4.Identity });
     }
 
     public void SetupInstancing(Matrix4x4[] instances)
     {
+        CreateInstanceBuffer(instances.Length == 0 ? new[] { Matrix4x4.Identity } : instances);
+    }
+
+    private void CreateInstanceBuffer(Matrix4x4[] instances)
+    {
         _instanceCount = (uint)instances.Length;
-        
+
         _instanceBuffer?.Dispose();
         _instanceBuffer = new VulkanBuffer(
             _context,

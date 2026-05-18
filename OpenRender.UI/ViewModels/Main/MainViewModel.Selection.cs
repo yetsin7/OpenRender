@@ -103,37 +103,33 @@ public partial class MainViewModel : ObservableObject
         UpdateAllProperties();
 
         FrameAll();
-        await Task.Delay(250);
-        SetView("Front");
-        await Task.Delay(250);
+        await Task.Delay(150);
 
-        if (!string.IsNullOrWhiteSpace(capturePath))
+        if (!TryGetSceneBounds(out var min, out var max))
         {
-            await SoftwareRenderExporter.ExportAsync(Scene, _renderSettings, WithSuffix(capturePath, "_front"), _renderSettings.Format);
+            StatusText = "Smoke test cancelado: no pude calcular bounds del modelo.";
+            return;
         }
 
-        SetView("Right");
-        await Task.Delay(250);
-        SetView("Top");
-        await Task.Delay(250);
+        var frontCamera = Scene.Camera.Clone();
+        frontCamera.SetViewAndFrame("Front", min, max);
+
+        var topCamera = Scene.Camera.Clone();
+        topCamera.SetViewAndFrame("Top", min, max);
+
+        var heroCamera = Scene.Camera.Clone();
+        heroCamera.FramePhotoShot(min, max);
 
         if (!string.IsNullOrWhiteSpace(capturePath))
         {
-            await SoftwareRenderExporter.ExportAsync(Scene, _renderSettings, WithSuffix(capturePath, "_top"), _renderSettings.Format);
-        }
-
-        PreparePhotoShot();
-        await Task.Delay(260);
-
-        if (!string.IsNullOrWhiteSpace(capturePath))
-        {
-            await SoftwareRenderExporter.ExportAsync(Scene, _renderSettings, capturePath, _renderSettings.Format);
+            await SoftwareRenderExporter.ExportAsync(Scene, _renderSettings, WithSuffix(capturePath, "_front"), _renderSettings.Format, frontCamera);
+            await SoftwareRenderExporter.ExportAsync(Scene, _renderSettings, WithSuffix(capturePath, "_top"), _renderSettings.Format, topCamera);
+            await SoftwareRenderExporter.ExportAsync(Scene, _renderSettings, capturePath, _renderSettings.Format, heroCamera);
             StatusText = $"Smoke test completo. Captura guardada en {Path.GetFileName(capturePath)}.";
+            return;
         }
-        else
-        {
-            StatusText = "Smoke test de navegación completo.";
-        }
+
+        StatusText = "Smoke test de navegación completo.";
     }
 
     private void NotifyLumionPanelProperties()

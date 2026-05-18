@@ -31,6 +31,10 @@ public partial class MainViewModel : ObservableObject
         ViewportText = HasModel ? "Editor listo: cambia cámara, materiales y exporta la vista actual." : "Importa un modelo para poblar la escena.";
 
         PrepareSceneMaterials(Scene, autoApplyMatches: HasModel);
+
+        if (HasModel && TryGetSceneBounds(out var min, out var max))
+            Scene.Camera.FrameBoundingBox(min, max);
+
         RefreshScenePresentation();
         UpdateLoadedModelInfo(sourceLabel, importDuration);
         LoadLumionAssetCategories();
@@ -311,5 +315,29 @@ public partial class MainViewModel : ObservableObject
         CameraDistance = Scene.Camera.OrbitDistance;
         NavigationSpeed = Scene.Camera.MoveSpeed;
         OnPropertyChanged(nameof(CameraFocusText));
+    }
+
+    /// <summary>
+    /// Sincroniza el HUD y los inspectores con cambios de cámara originados
+    /// directamente desde el viewport interactivo.
+    /// </summary>
+    public void SyncViewportCameraState()
+    {
+        UpdateCameraProps();
+        OnPropertyChanged(nameof(SelectedNodePositionXText));
+        OnPropertyChanged(nameof(SelectedNodePositionYText));
+        OnPropertyChanged(nameof(SelectedNodePositionZText));
+    }
+
+    /// <summary>
+    /// Refresca el inspector cuando el viewport detecta cambios de material
+    /// originados por sliders u otras ediciones directas sobre el objeto activo.
+    /// </summary>
+    public void SyncViewportMaterialState()
+    {
+        UpdateMaterialBindings();
+        OnPropertyChanged(nameof(SelectedMaterialDisplayName));
+        OnPropertyChanged(nameof(SelectedMaterialTextureName));
+        OnPropertyChanged(nameof(SelectedMaterialNormalTextureName));
     }
 }
